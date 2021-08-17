@@ -1,6 +1,6 @@
 
 generate: generate-deps
-	go generate ./...
+	go generate ./shared/...
 
 generate-deps:
 	go install shared/main/gentables.go

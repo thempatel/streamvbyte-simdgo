@@ -7,6 +7,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/pkg/errors"
+
 	"github.com/theMPatel/streamvbyte-simdgo/util"
 )
 
@@ -47,6 +49,10 @@ func main() {
 	if err := genDecodeShuffleTable(out); err != nil {
 		log.Fatalf("failed to gen decode shuffle table")
 	}
+
+	if _, err := fmt.Fprintln(out, ""); err != nil {
+		log.Fatalf("failed to add newline to file: %s", err)
+	}
 }
 
 func newLineAfter(countPerLine int) func(out io.Writer) {
@@ -66,7 +72,10 @@ func genPerNumLengthTable(out io.Writer) error {
 	tabber := newLineAfter(4)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
-		_, _ = fmt.Fprintf(out, "\t%#02x: {%d, %d, %d, %d},", i, one, two, three, four)
+		_, err := fmt.Fprintf(out, "\t%#02x: {%d, %d, %d, %d},", i, one, two, three, four)
+		if err != nil {
+			return errors.Wrapf(err, "failed to write per num len: %d", i)
+		}
 		tabber(out)
 	}
 	_, _ = fmt.Fprintf(out, "}")
@@ -78,23 +87,86 @@ func genPerQuadLengthTable(out io.Writer) error {
 	tabber := newLineAfter(8)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
-		_, _ = fmt.Fprintf(out, "\t%#02x: %d,", i, one+two+three+four)
+		_, err := fmt.Fprintf(out, "\t%#02x: %d,", i, one+two+three+four)
+		if err != nil {
+			return errors.Wrapf(err, "failed to write summed len: %d", i)
+		}
 		tabber(out)
 	}
 	_, _ = fmt.Fprintf(out, "}")
 	return nil
 }
 
+const shuffleFmtStr = "%#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x},"
+
 func genEncodeShuffleTable(out io.Writer) error {
+	_, _ = fmt.Fprintf(out, "\nvar EncodeShuffleTable = map[uint8][16]uint8{\n")
+	tabber := newLineAfter(1)
+	for i := 0; i < MaxControlByte; i++ {
+		one, two, three, four := sizes(uint8(i))
+		_, err := fmt.Fprintf(out, "\t%#02x: {", i)
+		if err != nil {
+			return errors.Wrapf(err, "failed to write encode shuffle table")
+		}
+
+		var positions []interface{}
+		var base uint8
+		for _, size := range []uint8{one, two, three, four} {
+			for j := uint8(0); j < size; j++ {
+				positions = append(positions, base+j)
+			}
+			base += 4
+		}
+
+		for len(positions) < 16 {
+			positions = append(positions, 0xff)
+		}
+		_, err = fmt.Fprintf(out, shuffleFmtStr, positions...)
+		if err != nil {
+			return errors.Wrapf(err, "failed to write per num len: %d", i)
+		}
+		tabber(out)
+	}
+	_, _ = fmt.Fprintf(out, "}")
 	return nil
 }
 
 func genDecodeShuffleTable(out io.Writer) error {
+	_, _ = fmt.Fprintf(out, "\nvar DecodeShuffleTable = map[uint8][16]uint8{\n")
+	tabber := newLineAfter(1)
+	for i := 0; i < MaxControlByte; i++ {
+		one, two, three, four := sizes(uint8(i))
+		_, err := fmt.Fprintf(out, "\t%#02x: {", i)
+		if err != nil {
+			return errors.Wrapf(err, "failed to write encode shuffle table")
+		}
+
+		var positions []interface{}
+		var pos uint8
+		for _, size := range []uint8{one, two, three, four} {
+			for j := 0; j < 4; j++ {
+				if size > 0 {
+					positions = append(positions, pos)
+					pos++
+					size--
+				} else {
+					positions = append(positions, 0xff)
+				}
+			}
+		}
+
+		_, err = fmt.Fprintf(out, shuffleFmtStr, positions...)
+		if err != nil {
+			return errors.Wrapf(err, "failed to write per num len: %d", i)
+		}
+		tabber(out)
+	}
+	_, _ = fmt.Fprintf(out, "}")
 	return nil
 }
 
 
-// Sizes returns the length in bytes for each of the four numbers
+// sizes returns the length in bytes for each of the four numbers
 // represented by the provided control byte.
 func sizes(control uint8) (one uint8, two uint8, three uint8, four uint8) {
 	one = (control & 3) + 1
