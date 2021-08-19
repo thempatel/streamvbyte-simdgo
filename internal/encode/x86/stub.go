@@ -3,4 +3,4 @@
 package x86
 
 // Encodes 8 32-bit unsigned integers at a time.
-func x86ControlBytes8(in []uint32) uint32
+func x86ControlBytes8(in []uint32) (r uint32)

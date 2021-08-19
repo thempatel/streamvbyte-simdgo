@@ -2,22 +2,25 @@
 
 #include "textflag.h"
 
-// func x86ControlBytes8(in []uint32) uint32
+// func x86ControlBytes8(in []uint32) (r uint32)
 // Requires: AVX, AVX2, SSE2
 TEXT ·x86ControlBytes8(SB), NOSPLIT, $0-28
-	MOVB         $0x11, CL
-	MOVW         $0x7f00, DX
-	VPBROADCASTB (CL), X0
-	VPBROADCASTW (DX), X1
-	MOVQ         in_base+0(FP), CX
-	VLDDQU       (CX), X2
-	VLDDQU       128(CX), X3
+	VPBROADCASTW mask_01<>+0(SB), X0
+	VPBROADCASTW mask_7F00<>+0(SB), X1
+	MOVQ         in_base+0(FP), AX
+	VLDDQU       (AX), X2
+	VLDDQU       16(AX), X3
 	PMINUB       X0, X2
 	PMINUB       X0, X3
 	PACKUSWB     X3, X2
 	PMINSW       X0, X2
 	PADDUSW      X1, X2
-	ANDL         $0x00000000, AX
 	PMOVMSKB     X2, AX
-	MOVL         AX, ret+24(FP)
+	MOVL         AX, r+24(FP)
 	RET
+
+DATA mask_01<>+0(SB)/2, $0x1111
+GLOBL mask_01<>(SB), RODATA|NOPTR, $2
+
+DATA mask_7F00<>+0(SB)/2, $0x7f00
+GLOBL mask_7F00<>(SB), RODATA|NOPTR, $2
