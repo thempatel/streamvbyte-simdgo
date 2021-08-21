@@ -13,7 +13,7 @@ var (
 	upperCtl = ^lowerCtrl
 
 	name = "PutUint32x86_8"
-	signature = "func(in []uint32, outBytes []byte, shuffle [256][16]uint8, lenTable [256]uint8) (r uint16)"
+	signature = "func(in []uint32, outBytes []byte, shuffle [][16]uint8, lenTable []uint8) (r uint16)"
 )
 
 func main() {
@@ -76,9 +76,12 @@ func main() {
 	VMOVDQU(firstShuffle, operand.Mem{Base: baseAddr})
 
 	Load(Param("lenTable").Base(), reg.RAX)
-	ADDB(ctrl.As8(), reg.RAX)
-	MOVB(operand.Mem{Base: reg.RAX}, reg.RAX)
-	ADDB(reg.RAX, baseAddr)
+	ANDL(operand.Imm(0xff), ctrl)
+	ADDQ(ctrl.As64(), reg.RAX)
+
+	length := GP8()
+	MOVB(operand.Mem{Base: reg.RAX}, length)
+	ADDQ(length.As64(), baseAddr)
 	VMOVDQU(secondShuffle, operand.Mem{Base: baseAddr})
 
 	RET()

@@ -1,5 +1,3 @@
-// +build ignore
-
 package main
 
 import (
@@ -11,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
+	"github.com/theMPatel/streamvbyte-simdgo/internal/util"
 )
 
 var (

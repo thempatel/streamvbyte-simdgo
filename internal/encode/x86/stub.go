@@ -2,5 +2,5 @@
 
 package x86
 
-// Encodes 8 32-bit unsigned integers at a time.
-func x86ControlBytes8(in []uint32) (r uint32)
+// PutUint32x86_8 encodes 8 32-bit unsigned integers at a time.
+func PutUint32x86_8(in []uint32, outBytes []byte, shuffle [][16]uint8, lenTable []uint8) (r uint16)
