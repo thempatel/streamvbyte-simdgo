@@ -132,6 +132,8 @@ func genEncodeShuffleTable(out io.Writer) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed to write per num len: %d", i)
 		}
+
+		_, _ = fmt.Fprintf(out, " // %#02x", i)
 		tabber(out)
 	}
 	_, _ = fmt.Fprintf(out, "}")
@@ -166,6 +168,8 @@ func genDecodeShuffleTable(out io.Writer) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed to write per num len: %d", i)
 		}
+
+		_, _ = fmt.Fprintf(out, " // %#02x", i)
 		tabber(out)
 	}
 	_, _ = fmt.Fprintf(out, "}")

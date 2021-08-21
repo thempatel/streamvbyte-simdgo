@@ -3,7 +3,6 @@ package main
 import (
 	. "github.com/mmcloughlin/avo/build"
 	"github.com/mmcloughlin/avo/operand"
-	"github.com/mmcloughlin/avo/reg"
 )
 
 var (
@@ -13,7 +12,7 @@ var (
 	upperCtl = ^lowerCtrl
 
 	name = "PutUint32x86_8"
-	signature = "func(in []uint32, outBytes []byte, shuffle [][16]uint8, lenTable []uint8) (r uint16)"
+	signature = "func(in []uint32, outBytes []byte, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)"
 )
 
 func main() {
@@ -51,38 +50,42 @@ func main() {
 	VPMOVMSKB(minFirstFour, ctrl)
 	Store(ctrl.As16(), Return("r"))
 
-	shuffleBase := Load(Param("shuffle").Base(), GP64())
-
+	shuffleBase := Load(Param("shuffle"), GP64())
 	// Gives the index into the shuffle table for the first 4 numbers encoded
 	// Move the lower 8 bytes into the register
-	MOVBQZX(ctrl.As8(), reg.RAX)
+	a := GP64()
+	b := GP64()
+	MOVBQZX(ctrl.As8(), a)
+	MOVWQZX(ctrl.As16(), b)
+	SHRQ(operand.Imm(8), b)
 	// Left shift by 4 to get the byte level offset for the shuffle table
-	SHLQ(operand.Imm(4), reg.RAX)
-	ADDQ(shuffleBase, reg.RAX)
-	firstShuffle := XMM()
-	VLDDQU(operand.Mem{Base: reg.RAX}, firstShuffle)
+	SHLQ(operand.Imm(4), a)
+	SHLQ(operand.Imm(4), b)
+	ADDQ(shuffleBase, a)
+	ADDQ(shuffleBase, b)
 
-	MOVWQZX(ctrl.As16(), reg.RAX)
-	SHRQ(operand.Imm(8), reg.RAX)
-	SHLQ(operand.Imm(4), reg.RAX)
-	ADDQ(shuffleBase, reg.RAX)
+	firstShuffle := XMM()
 	secondShuffle := XMM()
-	VLDDQU(operand.Mem{Base: reg.RAX}, secondShuffle)
+	VLDDQU(operand.Mem{Base: a}, firstShuffle)
+	VLDDQU(operand.Mem{Base: b}, secondShuffle)
 
 	VPSHUFB(firstShuffle, firstFour, firstFour)
 	VPSHUFB(secondShuffle, secondFour, secondFour)
 
-	baseAddr := Load(Param("outBytes").Base(), GP64())
-	VMOVDQU(firstShuffle, operand.Mem{Base: baseAddr})
+	firstAddr := Load(Param("outBytes").Base(), GP64())
+	secondAddr := GP64()
+	MOVQ(firstAddr, secondAddr)
 
-	Load(Param("lenTable").Base(), reg.RAX)
-	ANDL(operand.Imm(0xff), ctrl)
-	ADDQ(ctrl.As64(), reg.RAX)
+	lenTable := Load(Param("lenTable"), GP64())
+	lenValue := GP64()
+	MOVBQZX(ctrl.As8L(), lenValue)
+	ADDQ(lenTable, lenValue)
 
-	length := GP8()
-	MOVB(operand.Mem{Base: reg.RAX}, length)
-	ADDQ(length.As64(), baseAddr)
-	VMOVDQU(secondShuffle, operand.Mem{Base: baseAddr})
+	MOVBQZX(operand.Mem{Base: lenValue}, lenValue)
+	ADDQ(lenValue, secondAddr)
+
+	VMOVDQU(firstFour, operand.Mem{Base: firstAddr})
+	VMOVDQU(secondFour, operand.Mem{Base: secondAddr})
 
 	RET()
 	Generate()

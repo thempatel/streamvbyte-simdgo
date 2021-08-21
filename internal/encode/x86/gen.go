@@ -1,7 +1,4 @@
 package x86
 
 //go:generate go run ./main/asm.go -out ./x86_encode.s -stubs stub.go
-
-func ControlBytes(in []uint32) uint32 {
-	return x86ControlBytes8(in)
-}
+//go:generate go run ./main/asm2.go -out ./x86_getshuffle.s -stubs get_shuffle.go

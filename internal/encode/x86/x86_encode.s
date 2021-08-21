@@ -2,9 +2,9 @@
 
 #include "textflag.h"
 
-// func PutUint32x86_8(in []uint32, outBytes []byte, shuffle [][16]uint8, lenTable []uint8) (r uint16)
+// func PutUint32x86_8(in []uint32, outBytes []byte, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
 // Requires: AVX, AVX2
-TEXT ·PutUint32x86_8(SB), NOSPLIT, $0-98
+TEXT ·PutUint32x86_8(SB), NOSPLIT, $0-66
 	VPBROADCASTW mask_01<>+0(SB), X0
 	VPBROADCASTW mask_7F00<>+0(SB), X1
 	MOVQ         in_base+0(FP), AX
@@ -15,28 +15,29 @@ TEXT ·PutUint32x86_8(SB), NOSPLIT, $0-98
 	VPACKUSWB    X5, X4, X4
 	VPMINSW      X0, X4, X4
 	VPADDUSW     X1, X4, X4
-	VPMOVMSKB    X4, CX
-	MOVW         CX, r+96(FP)
-	MOVQ         shuffle_base+48(FP), DX
-	MOVBQZX      CL, AX
-	SHLQ         $0x04, AX
-	ADDQ         DX, AX
-	VLDDQU       (AX), X0
-	MOVWQZX      CX, AX
-	SHRQ         $0x08, AX
-	SHLQ         $0x04, AX
-	ADDQ         DX, AX
-	VLDDQU       (AX), X1
+	VPMOVMSKB    X4, AX
+	MOVW         AX, r+64(FP)
+	MOVQ         shuffle+48(FP), CX
+	MOVBQZX      AL, DX
+	MOVWQZX      AX, BX
+	SHRQ         $0x08, BX
+	SHLQ         $0x04, DX
+	SHLQ         $0x04, BX
+	ADDQ         CX, DX
+	ADDQ         CX, BX
+	VLDDQU       (DX), X0
+	VLDDQU       (BX), X1
 	VPSHUFB      X0, X2, X2
 	VPSHUFB      X1, X3, X3
-	MOVQ         outBytes_base+24(FP), DX
-	VMOVDQU      X0, (DX)
-	MOVQ         lenTable_base+72(FP), AX
-	ANDL         $0xff, CX
-	ADDQ         CX, AX
-	MOVB         (AX), BL
-	ADDQ         BX, DX
-	VMOVDQU      X1, (DX)
+	MOVQ         outBytes_base+24(FP), CX
+	MOVQ         CX, DX
+	MOVQ         lenTable+56(FP), BX
+	MOVBQZX      AL, AX
+	ADDQ         BX, AX
+	MOVBQZX      (AX), AX
+	ADDQ         AX, DX
+	VMOVDQU      X2, (CX)
+	VMOVDQU      X3, (DX)
 	RET
 
 DATA mask_01<>+0(SB)/2, $0x1111
