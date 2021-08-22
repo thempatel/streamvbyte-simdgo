@@ -8,10 +8,8 @@ import (
 var (
 	mask_01 uint16 = 0x1111
 	mask_7F00 uint16 = 0x7F00
-	lowerCtrl uint64 = 0xFF
-	upperCtl = ^lowerCtrl
 
-	name = "PutUint32x86_8"
+	name = "put8uint32Fast"
 	signature = "func(in []uint32, outBytes []byte, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)"
 )
 
