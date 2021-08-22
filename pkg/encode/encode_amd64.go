@@ -1,3 +1,5 @@
+// +build amd64
+
 package encode
 
 import (
@@ -10,7 +12,7 @@ var check cpuCheck = func() bool {
 }
 
 func put8uint32(in []uint32, out []byte) uint16 {
-	return put8uint32Fast(in, out, &shared.EncodeShuffleTable, &shared.PerControlLenTable)
+	return put8uint32Fast(in, out, shared.EncodeShuffleTable, shared.PerControlLenTable)
 }
 
 func put8uint32Fast(

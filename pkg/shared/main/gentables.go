@@ -50,20 +50,13 @@ func main() {
 	if err := genDecodeShuffleTable(out); err != nil {
 		log.Fatalf("failed to gen decode shuffle table")
 	}
-
-	if _, err := fmt.Fprintln(out, ""); err != nil {
-		log.Fatalf("failed to add newline to file: %s", err)
-	}
 }
 
-func newLineAfter(countPerLine int, includeTab bool) func(out io.Writer) {
+func newLineAfter(countPerLine int) func(out io.Writer) {
 	count := 1
 	return func(out io.Writer) {
 		if count % countPerLine == 0 {
 			_, _ = fmt.Fprintln(out, "")
-			if includeTab {
-				_, _ = fmt.Fprint(out, "\t")
-			}
 		} else {
 			_, _ = fmt.Fprintf(out, " ")
 		}
@@ -72,8 +65,8 @@ func newLineAfter(countPerLine int, includeTab bool) func(out io.Writer) {
 }
 
 func genPerNumLengthTable(out io.Writer) error {
-	_, _ = fmt.Fprintf(out, "\nvar PerNumLenTable = [256][4]uint8{\n")
-	tabber := newLineAfter(4, false)
+	_, _ = fmt.Fprintf(out, "\nvar PerNumLenTable = &[256][4]uint8{\n")
+	tabber := newLineAfter(4)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
 		_, err := fmt.Fprintf(out, "\t{%d, %d, %d, %d},", one, two, three, four)
@@ -82,35 +75,36 @@ func genPerNumLengthTable(out io.Writer) error {
 		}
 		tabber(out)
 	}
-	_, _ = fmt.Fprintf(out, "}")
+	_, _ = fmt.Fprintln(out, "}")
 	return nil
 }
 
 func genPerQuadLengthTable(out io.Writer) error {
-	_, _ = fmt.Fprintf(out, "\nvar PerControlLenTable = [256]uint8{\n")
-	tabber := newLineAfter(8, true)
+	_, _ = fmt.Fprintf(out, "\nvar PerControlLenTable = &[256]uint8{\n")
+	tabber := newLineAfter(8)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
-		if i == 0 {
-			fmt.Fprint(out, "\t")
-		}
-		_, err := fmt.Fprintf(out, " %d,", one+two+three+four)
+		_, err := fmt.Fprintf(out, "\t%d,", one+two+three+four)
 		if err != nil {
 			return errors.Wrapf(err, "failed to write summed len: %d", i)
 		}
 		tabber(out)
 	}
-	_, _ = fmt.Fprintf(out, "}")
+	_, _ = fmt.Fprintln(out, "}")
 	return nil
 }
 
-const shuffleFmtStr = "%#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x},"
+const (
+	shuffleFmtStr = "%#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x},"
+	commentStr = "\t// %d\t%#02x\t%08b\tlen\t%d\t%d\t%d\t%d\n"
+)
 
 func genEncodeShuffleTable(out io.Writer) error {
-	_, _ = fmt.Fprintf(out, "\nvar EncodeShuffleTable = [256][16]uint8{\n")
-	tabber := newLineAfter(1, false)
+	_, _ = fmt.Fprintf(out, "\nvar EncodeShuffleTable = &[256][16]uint8{\n")
+	tabber := newLineAfter(1)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
+		_, _ = fmt.Fprintf(out, commentStr, i, i, i, one, two, three, four)
 		_, err := fmt.Fprintf(out, "\t{")
 		if err != nil {
 			return errors.Wrapf(err, "failed to write encode shuffle table")
@@ -132,19 +126,18 @@ func genEncodeShuffleTable(out io.Writer) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed to write per num len: %d", i)
 		}
-
-		_, _ = fmt.Fprintf(out, " // %#02x", i)
 		tabber(out)
 	}
-	_, _ = fmt.Fprintf(out, "}")
+	_, _ = fmt.Fprintln(out, "}")
 	return nil
 }
 
 func genDecodeShuffleTable(out io.Writer) error {
-	_, _ = fmt.Fprintf(out, "\nvar DecodeShuffleTable = [256][16]uint8{\n")
-	tabber := newLineAfter(1, false)
+	_, _ = fmt.Fprintf(out, "\nvar DecodeShuffleTable = &[256][16]uint8{\n")
+	tabber := newLineAfter(1)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
+		_, _ = fmt.Fprintf(out, commentStr, i, i, i, one, two, three, four)
 		_, err := fmt.Fprintf(out, "\t{")
 		if err != nil {
 			return errors.Wrapf(err, "failed to write encode shuffle table")
@@ -168,11 +161,9 @@ func genDecodeShuffleTable(out io.Writer) error {
 		if err != nil {
 			return errors.Wrapf(err, "failed to write per num len: %d", i)
 		}
-
-		_, _ = fmt.Fprintf(out, " // %#02x", i)
 		tabber(out)
 	}
-	_, _ = fmt.Fprintf(out, "}")
+	_, _ = fmt.Fprintln(out, "}")
 	return nil
 }
 
