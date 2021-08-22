@@ -1,9 +1,17 @@
 package encode
 
 import (
+	"math/rand"
 	"reflect"
 	"testing"
+	"time"
+
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func TestPut8uint32Scalar(t *testing.T) {
 	in := []uint32{1024, 3, 2, 1, 1_073_741_824, 10, 12, 1024}
@@ -11,7 +19,7 @@ func TestPut8uint32Scalar(t *testing.T) {
 		0x00, 0x04, 0x03, 0x02, 0x01, 0x00, 0x00, 0x00, 0x40,
 		0x0a, 0x0c, 0x00, 0x04,
 	}
-	
+
 	expectedCtrl := uint16(0b01_00_00_11_00_00_00_01)
 	out := make([]byte, 32)
 	actualCtrl := put8uint32Scalar(in, out)
@@ -22,5 +30,32 @@ func TestPut8uint32Scalar(t *testing.T) {
 	actualData := out[:13]
 	if !reflect.DeepEqual(expectedData, actualData) {
 		t.Fatalf("expected %+v, got %+v", expectedData, actualData)
+	}
+}
+
+func TestPut8uint32Fast(t *testing.T) {
+	if !check() {
+		t.Skipf("Testing environment doesn't support this test")
+	}
+
+	nums := make([]uint32, 8)
+	for i := 0; i < 8; i++ {
+		nums[i] = rand.Uint32()
+	}
+
+	out := make([]byte, MaxBytesEncodedQuad*2)
+	scalarCtrl := put8uint32Scalar(nums, out)
+	out = out[:shared.ControlByteToSizeTwo(scalarCtrl)]
+
+	fastOut := make([]byte, MaxBytesEncodedQuad*2)
+	fastCtrl := put8uint32(nums, out)
+	fastOut = fastOut[:shared.ControlByteToSizeTwo(fastCtrl)]
+
+	if scalarCtrl != fastCtrl {
+		t.Fatalf("expected %#04x, actual %#04x", scalarCtrl, fastCtrl)
+	}
+
+	if !reflect.DeepEqual(out, fastOut) {
+		t.Fatalf("expected %+v, got %+v", out, fastOut)
 	}
 }

@@ -7,12 +7,16 @@ import (
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
-type Put8Impl func([]uint32, []byte) uint16
-type cpuCheck func() bool
+const (
+	MaxBytesEncodedQuad = 16
+)
 
 var (
 	putImpl Put8Impl
 )
+
+type Put8Impl func([]uint32, []byte) uint16
+type cpuCheck func() bool
 
 func init() {
 	if check() {
