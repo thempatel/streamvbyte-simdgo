@@ -22,7 +22,7 @@ func TestPut8uint32Scalar(t *testing.T) {
 
 	expectedCtrl := uint16(0b01_00_00_11_00_00_00_01)
 	out := make([]byte, 32)
-	actualCtrl := put8uint32Scalar(in, out)
+	actualCtrl := Put8uint32Scalar(in, out)
 	if actualCtrl != expectedCtrl {
 		t.Fatalf("expected: %#016b, got %#016b", expectedCtrl, actualCtrl)
 	}
@@ -45,7 +45,7 @@ func TestPut8uint32Fast(t *testing.T) {
 	}
 
 	out := make([]byte, MaxBytesPerNum*count)
-	scalarCtrl := put8uint32Scalar(nums, out)
+	scalarCtrl := Put8uint32Scalar(nums, out)
 	out = out[:shared.ControlByteToSizeTwo(scalarCtrl)]
 
 	fastOut := make([]byte, MaxBytesPerNum*count)
@@ -92,7 +92,7 @@ func BenchmarkPut8uint32Scalar(b *testing.B) {
 	var ctrl uint16
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ctrl = put8uint32Scalar(nums, out)
+		ctrl = Put8uint32Scalar(nums, out)
 	}
 	ctrlSinkB = ctrl
 }

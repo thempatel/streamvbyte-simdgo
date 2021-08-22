@@ -22,7 +22,7 @@ func init() {
 	if check() {
 		putImpl = put8uint32
 	} else {
-		putImpl = put8uint32Scalar
+		putImpl = Put8uint32Scalar
 	}
 }
 
@@ -30,16 +30,16 @@ func Put8uint32(in []uint32, out []byte) uint16 {
 	return putImpl(in, out)
 }
 
-func put8uint32Scalar(in []uint32, out []byte ) uint16 {
+func Put8uint32Scalar(in []uint32, out []byte ) uint16 {
 	var ctrl uint16
-	first := put4uint32Scalar(in, out)
+	first := Put4uint32Scalar(in, out)
 	ctrl |= uint16(first)
 	encoded := shared.ControlByteToSize(first)
-	second := put4uint32Scalar(in[4:], out[encoded:])
+	second := Put4uint32Scalar(in[4:], out[encoded:])
 	return ctrl | uint16(second)<<8
 }
 
-func put4uint32Scalar(in []uint32, out []byte ) uint8 {
+func Put4uint32Scalar(in []uint32, out []byte ) uint8 {
 	// Drop the bounds checks
 	_ = in[3]
 
