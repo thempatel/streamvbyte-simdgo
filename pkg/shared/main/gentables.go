@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/theMPatel/streamvbyte-simdgo/internal/util"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
 
 var (
