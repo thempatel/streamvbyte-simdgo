@@ -18,10 +18,9 @@ var (
 )
 
 type Get4Impl func(in []byte, out []uint32, ctrl uint8) int
-type cpuCheck func() bool
 
 func init() {
-	if check() {
+	if GetMode() == shared.Fast {
 		getImpl = get8uint32
 	} else {
 		getImpl = Get4uint32Scalar

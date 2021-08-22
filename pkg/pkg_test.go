@@ -8,7 +8,6 @@ import (
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
 )
 
-
 func TestRoundTripScalar(t *testing.T) {
 	in := []uint32{1024, 3, 2, 1, 1_073_741_824, 10, 12, 1024}
 	expectedData := []byte{

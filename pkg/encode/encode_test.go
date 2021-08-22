@@ -34,7 +34,7 @@ func TestPut8uint32Scalar(t *testing.T) {
 }
 
 func TestPut8uint32Fast(t *testing.T) {
-	if !check() {
+	if GetMode() == shared.Normal {
 		t.Skipf("Testing environment doesn't support this test")
 	}
 

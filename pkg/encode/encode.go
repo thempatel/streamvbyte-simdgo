@@ -16,10 +16,9 @@ var (
 )
 
 type Put8Impl func([]uint32, []byte) uint16
-type cpuCheck func() bool
 
 func init() {
-	if check() {
+	if GetMode() == shared.Fast {
 		putImpl = put8uint32
 	} else {
 		putImpl = Put8uint32Scalar

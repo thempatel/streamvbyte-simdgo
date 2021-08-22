@@ -7,8 +7,11 @@ import (
 	"golang.org/x/sys/cpu"
 )
 
-var check cpuCheck = func() bool {
-	return cpu.X86.HasAVX && cpu.X86.HasAVX2
+func GetMode() shared.PerformanceMode {
+	if cpu.X86.HasAVX && cpu.X86.HasAVX2 {
+		return shared.Fast
+	}
+	return shared.Normal
 }
 
 func put8uint32(in []uint32, out []byte) uint16 {
