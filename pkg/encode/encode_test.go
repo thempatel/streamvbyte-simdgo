@@ -48,7 +48,7 @@ func TestPut8uint32Fast(t *testing.T) {
 	out = out[:shared.ControlByteToSizeTwo(scalarCtrl)]
 
 	fastOut := make([]byte, MaxBytesEncodedQuad*2)
-	fastCtrl := put8uint32(nums, out)
+	fastCtrl := put8uint32(nums, fastOut)
 	fastOut = fastOut[:shared.ControlByteToSizeTwo(fastCtrl)]
 
 	if scalarCtrl != fastCtrl {
