@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	MaxBytesEncodedQuad = 16
+	MaxBytesPerNum = 4
 )
 
 var (

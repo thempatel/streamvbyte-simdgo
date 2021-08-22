@@ -38,16 +38,17 @@ func TestPut8uint32Fast(t *testing.T) {
 		t.Skipf("Testing environment doesn't support this test")
 	}
 
-	nums := make([]uint32, 8)
+	count := 8
+	nums := make([]uint32, count)
 	for i := 0; i < 8; i++ {
 		nums[i] = rand.Uint32()
 	}
 
-	out := make([]byte, MaxBytesEncodedQuad*2)
+	out := make([]byte, MaxBytesPerNum*count)
 	scalarCtrl := put8uint32Scalar(nums, out)
 	out = out[:shared.ControlByteToSizeTwo(scalarCtrl)]
 
-	fastOut := make([]byte, MaxBytesEncodedQuad*2)
+	fastOut := make([]byte, MaxBytesPerNum*count)
 	fastCtrl := put8uint32(nums, fastOut)
 	fastOut = fastOut[:shared.ControlByteToSizeTwo(fastCtrl)]
 
@@ -58,4 +59,40 @@ func TestPut8uint32Fast(t *testing.T) {
 	if !reflect.DeepEqual(out, fastOut) {
 		t.Fatalf("expected %+v, got %+v", out, fastOut)
 	}
+}
+
+var ctrlSinkA uint16
+
+func BenchmarkPut8uint32Fast(b *testing.B) {
+	count := 8
+	nums := make([]uint32, count)
+	for i := 0; i < count; i++ {
+		nums[i] = rand.Uint32()
+	}
+	out := make([]byte, MaxBytesPerNum*count)
+
+	var ctrl uint16
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ctrl = put8uint32(nums, out)
+	}
+	ctrlSinkA = ctrl
+}
+
+var ctrlSinkB uint16
+
+func BenchmarkPut8uint32Scalar(b *testing.B) {
+	count := 8
+	nums := make([]uint32, count)
+	for i := 0; i < 8; i++ {
+		nums[i] = rand.Uint32()
+	}
+	out := make([]byte, MaxBytesPerNum*count)
+
+	var ctrl uint16
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ctrl = put8uint32Scalar(nums, out)
+	}
+	ctrlSinkB = ctrl
 }
