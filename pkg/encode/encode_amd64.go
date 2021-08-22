@@ -1,7 +1,7 @@
 package encode
 
 import (
-	"github.com/theMPatel/streamvbyte-simdgo/internal/shared"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 	"golang.org/x/sys/cpu"
 )
 
