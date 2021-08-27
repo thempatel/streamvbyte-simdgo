@@ -2,15 +2,14 @@
 
 #include "textflag.h"
 
-// func get8uint32Fast(in []byte, out []uint32, ctrl uint16, shufA *[16]uint8, shufB *[16]uint8, lenA uint8)
+// func get8uint32Fast(in []byte, out []uint32, shufA *[16]uint8, shufB *[16]uint8, lenA uint8)
 // Requires: AVX
-TEXT ·get8uint32Fast(SB), NOSPLIT, $0-80
-	MOVW    ctrl+48(FP), AX
-	MOVQ    shufA+56(FP), AX
-	MOVQ    shufB+64(FP), CX
+TEXT ·get8uint32Fast(SB), NOSPLIT, $0-72
+	MOVQ    shufA+48(FP), AX
+	MOVQ    shufB+56(FP), CX
 	MOVQ    in_base+0(FP), DX
 	MOVQ    DX, BX
-	MOVBQZX lenA+72(FP), SI
+	MOVBQZX lenA+64(FP), SI
 	ADDQ    SI, BX
 	VLDDQU  (DX), X0
 	VLDDQU  (BX), X1

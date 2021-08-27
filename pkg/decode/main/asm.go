@@ -12,7 +12,6 @@ const (
 
 	pIn = "in"
 	pOut = "out"
-	pCtrl = "ctrl"
 	pShufA = "shufA"
 	pShufB = "shufB"
 	pLenA = "lenA"
@@ -20,16 +19,14 @@ const (
 
 var (
 	signature = fmt.Sprintf(
-		"func(%s []byte, %s []uint32, %s uint16, %s, %s *[16]uint8, %s uint8)",
-		pIn, pOut, pCtrl, pShufA, pShufB, pLenA)
+		"func(%s []byte, %s []uint32, %s, %s *[16]uint8, %s uint8)",
+		pIn, pOut, pShufA, pShufB, pLenA)
 )
 
 func main() {
 	TEXT(name, NOSPLIT, signature)
 	Doc("get8uint32Fast decodes 8 32-bit unsigned integers at a time.")
 
-	ctrl := GP16()
-	Load(Param(pCtrl), ctrl)
 	shuffleA := operand.Mem{
 		Base: Load(Param(pShufA), GP64()),
 	}
