@@ -8,27 +8,35 @@ import (
 )
 
 var (
-	getImpl Get4Impl
+	getImpl Get8Impl
+
 	bufPool = sync.Pool{
 		New: func() interface{} {
 			buf := make([]byte, 4)
 			return &buf
 		},
 	}
+
+	zeroSlice = make([]byte, 4)
 )
 
-type Get4Impl func(in []byte, out []uint32, ctrl uint8) int
+type Get8Impl func(in []byte, out []uint32, ctrl uint16) int
 
 func init() {
 	if GetMode() == shared.Fast {
 		getImpl = get8uint32
 	} else {
-		getImpl = Get4uint32Scalar
+		getImpl = Get8uint32Scalar
 	}
 }
 
-func Get4uint32(in []byte, out []uint32, ctrl uint8) int {
+func Get8uint32(in []byte, out []uint32, ctrl uint16) int {
 	return getImpl(in, out, ctrl)
+}
+
+func Get8uint32Scalar(in []byte, out []uint32, ctrl uint16) int {
+	read := Get4uint32Scalar(in, out, uint8(ctrl & 0xff))
+	return read + Get4uint32Scalar(in[read:], out[4:], uint8(ctrl>>8))
 }
 
 func Get4uint32Scalar(in []byte, out []uint32, ctrl uint8) int {
@@ -53,8 +61,6 @@ func Get4uint32Scalar(in []byte, out []uint32, ctrl uint8) int {
 
 	return int(len0+len1+len2+len3)
 }
-
-var zeroSlice = make([]byte, 4)
 
 func decodeOne(input []byte, size uint8, buf []byte) uint32 {
 	copy(buf, input[:size])

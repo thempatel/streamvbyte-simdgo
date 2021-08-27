@@ -5,8 +5,8 @@
 // func put8uint32Fast(in []uint32, outBytes []byte, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
 // Requires: AVX, AVX2
 TEXT ·put8uint32Fast(SB), NOSPLIT, $0-66
-	VPBROADCASTW mask_01<>+0(SB), X0
-	VPBROADCASTW mask_7F00<>+0(SB), X1
+	VPBROADCASTW mask1111<>+0(SB), X0
+	VPBROADCASTW mask7F00<>+0(SB), X1
 	MOVQ         in_base+0(FP), AX
 	VLDDQU       (AX), X2
 	VLDDQU       16(AX), X3
@@ -19,14 +19,14 @@ TEXT ·put8uint32Fast(SB), NOSPLIT, $0-66
 	MOVW         AX, r+64(FP)
 	MOVQ         shuffle+48(FP), CX
 	MOVBQZX      AL, DX
-	MOVWQZX      AX, BX
-	SHRQ         $0x08, BX
 	SHLQ         $0x04, DX
-	SHLQ         $0x04, BX
 	ADDQ         CX, DX
-	ADDQ         CX, BX
 	VLDDQU       (DX), X0
-	VLDDQU       (BX), X1
+	MOVWQZX      AX, DX
+	SHRQ         $0x08, DX
+	SHLQ         $0x04, DX
+	ADDQ         CX, DX
+	VLDDQU       (DX), X1
 	VPSHUFB      X0, X2, X2
 	VPSHUFB      X1, X3, X3
 	MOVQ         outBytes_base+24(FP), CX
@@ -40,8 +40,8 @@ TEXT ·put8uint32Fast(SB), NOSPLIT, $0-66
 	VMOVDQU      X3, (DX)
 	RET
 
-DATA mask_01<>+0(SB)/2, $0x1111
-GLOBL mask_01<>(SB), RODATA|NOPTR, $2
+DATA mask1111<>+0(SB)/2, $0x1111
+GLOBL mask1111<>(SB), RODATA|NOPTR, $2
 
-DATA mask_7F00<>+0(SB)/2, $0x7f00
-GLOBL mask_7F00<>(SB), RODATA|NOPTR, $2
+DATA mask7F00<>+0(SB)/2, $0x7f00
+GLOBL mask7F00<>(SB), RODATA|NOPTR, $2

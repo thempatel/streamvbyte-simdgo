@@ -1,31 +1,47 @@
 package main
 
 import (
+	"fmt"
+
 	. "github.com/mmcloughlin/avo/build"
 	"github.com/mmcloughlin/avo/operand"
+	"github.com/mmcloughlin/avo/reg"
+)
+
+const (
+	mask1111 uint16 = 0x1111
+	mask7F00 uint16 = 0x7F00
+
+	mask1111Str = "mask1111"
+	mask7F00Str = "mask7F00"
+
+	name = "put8uint32Fast"
+	pIn = "in"
+	pOut = "outBytes"
+	pShuffle = "shuffle"
+	pLenTable = "lenTable"
+	pR = "r"
 )
 
 var (
-	mask_01 uint16 = 0x1111
-	mask_7F00 uint16 = 0x7F00
-
-	name = "put8uint32Fast"
-	signature = "func(in []uint32, outBytes []byte, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)"
+	signature = fmt.Sprintf(
+		"func(%s []uint32, %s []byte, %s *[256][16]uint8, %s *[256]uint8) (%s uint16)",
+		pIn, pOut, pShuffle, pLenTable, pR)
 )
 
 func main() {
 	TEXT(name, NOSPLIT, signature)
-	Doc("PutUint32x86_8 encodes 8 32-bit unsigned integers at a time.")
+	Doc("put8uint32Fast encodes 8 32-bit unsigned integers at a time.")
 
-	maskO1 := ConstData("mask_01", operand.U16(mask_01))
-	mask7F00 := ConstData("mask_7F00", operand.U16(mask_7F00))
+	mask1111R := ConstData(mask1111Str, operand.U16(mask1111))
+	mask7F00R := ConstData(mask7F00Str, operand.U16(mask7F00))
 
 	onesMask := XMM()
 	sevenFzerozero := XMM()
-	VPBROADCASTW(maskO1, onesMask)
-	VPBROADCASTW(mask7F00, sevenFzerozero)
+	VPBROADCASTW(mask1111R, onesMask)
+	VPBROADCASTW(mask7F00R, sevenFzerozero)
 
-	arrBase := operand.Mem{Base: Load(Param("in").Base(), GP64())}
+	arrBase := operand.Mem{Base: Load(Param(pIn).Base(), GP64())}
 
 	firstFour := XMM()
 	secondFour := XMM()
@@ -46,38 +62,21 @@ func main() {
 
 	ctrl := GP32()
 	VPMOVMSKB(minFirstFour, ctrl)
-	Store(ctrl.As16(), Return("r"))
+	Store(ctrl.As16(), Return(pR))
 
-	shuffleBase := Load(Param("shuffle"), GP64())
-	// Gives the index into the shuffle table for the first 4 numbers encoded
-	// Move the lower 8 bytes into the register
-	a := GP64()
-	b := GP64()
-	MOVBQZX(ctrl.As8(), a)
-	MOVWQZX(ctrl.As16(), b)
-	SHRQ(operand.Imm(8), b)
-	// Left shift by 4 to get the byte level offset for the shuffle table
-	SHLQ(operand.Imm(4), a)
-	SHLQ(operand.Imm(4), b)
-	ADDQ(shuffleBase, a)
-	ADDQ(shuffleBase, b)
+	shuffleBase := Load(Param(pShuffle), GP64())
+	firstShuffle := loadCtrl16Shuffle(shuffleBase, ctrl, false)
+	secondShuffle := loadCtrl16Shuffle(shuffleBase, ctrl, true)
 
-	firstShuffle := XMM()
-	secondShuffle := XMM()
-	VLDDQU(operand.Mem{Base: a}, firstShuffle)
-	VLDDQU(operand.Mem{Base: b}, secondShuffle)
-
+	// TODO(milan): change to use memory operands
 	VPSHUFB(firstShuffle, firstFour, firstFour)
 	VPSHUFB(secondShuffle, secondFour, secondFour)
 
-	firstAddr := Load(Param("outBytes").Base(), GP64())
+	firstAddr := Load(Param(pOut).Base(), GP64())
 	secondAddr := GP64()
 	MOVQ(firstAddr, secondAddr)
 
-	lenTable := Load(Param("lenTable"), GP64())
-	lenValue := GP64()
-	MOVBQZX(ctrl.As8L(), lenValue)
-	ADDQ(lenTable, lenValue)
+	lenValue := loadLenValue(ctrl)
 
 	MOVBQZX(operand.Mem{Base: lenValue}, lenValue)
 	ADDQ(lenValue, secondAddr)
@@ -87,4 +86,30 @@ func main() {
 
 	RET()
 	Generate()
+}
+
+func loadCtrl16Shuffle(shuffleBase reg.Register, ctrl reg.GPVirtual, upper bool) reg.VecVirtual {
+	a := GP64()
+	if upper {
+		MOVWQZX(ctrl.As16(), a)
+		SHRQ(operand.Imm(8), a)
+	} else {
+		MOVBQZX(ctrl.As8(), a)
+	}
+
+	// Left shift by 4 to get the byte level offset for the shuffle table
+	SHLQ(operand.Imm(4), a)
+	ADDQ(shuffleBase, a)
+
+	shuffle := XMM()
+	VLDDQU(operand.Mem{Base: a}, shuffle)
+	return shuffle
+}
+
+func loadLenValue(ctrl reg.GPVirtual) reg.GPVirtual {
+	lt := Load(Param(pLenTable), GP64())
+	lenValue := GP64()
+	MOVBQZX(ctrl.As8L(), lenValue)
+	ADDQ(lt, lenValue)
+	return lenValue
 }
