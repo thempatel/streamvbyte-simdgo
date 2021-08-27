@@ -1,0 +1,3 @@
+
+generate:
+	go generate ./pkg/...
