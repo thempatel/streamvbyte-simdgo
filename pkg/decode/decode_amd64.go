@@ -25,7 +25,7 @@ func get8uint32(in []byte, out []uint32, ctrl uint16) int {
 		&shared.DecodeShuffleTable[upper],
 		sizeLower,
 	)
-	return int(sizeLower+sizeUpper)
+	return int(sizeLower + sizeUpper)
 }
 
 func get8uint32Fast(in []byte, out []uint32, shufA *[16]uint8, shufB *[16]uint8, lenA uint8)
