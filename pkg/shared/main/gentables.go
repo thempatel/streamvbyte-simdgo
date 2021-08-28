@@ -13,11 +13,11 @@ import (
 )
 
 var (
-	fOut = flag.String("out", "", "path to output")
+	fOut     = flag.String("out", "", "path to output")
 	fPackage = flag.String("package", "shared", "package name")
 )
 
-const MaxControlByte = 1<<8
+const MaxControlByte = 1 << 8
 
 func main() {
 	flag.Parse()
@@ -55,7 +55,7 @@ func main() {
 func newLineAfter(countPerLine int) func(out io.Writer) {
 	count := 1
 	return func(out io.Writer) {
-		if count % countPerLine == 0 {
+		if count%countPerLine == 0 {
 			_, _ = fmt.Fprintln(out, "")
 		} else {
 			_, _ = fmt.Fprintf(out, " ")
@@ -96,7 +96,7 @@ func genPerQuadLengthTable(out io.Writer) error {
 
 const (
 	shuffleFmtStr = "%#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x, %#02x},"
-	commentStr = "\t// %d\t%#02x\t%08b\tlen\t%d\t%d\t%d\t%d\n"
+	commentStr    = "\t// %d\t%#02x\t%08b\tlen\t%d\t%d\t%d\t%d\n"
 )
 
 func genEncodeShuffleTable(out io.Writer) error {
@@ -166,7 +166,6 @@ func genDecodeShuffleTable(out io.Writer) error {
 	_, _ = fmt.Fprintln(out, "}")
 	return nil
 }
-
 
 // sizes returns the length in bytes for each of the four numbers
 // represented by the provided control byte.
