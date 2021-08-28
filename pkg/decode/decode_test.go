@@ -46,3 +46,44 @@ func TestGet8uint32Fast(t *testing.T) {
 		t.Fatalf("expected %+v, got %+v", expected, out)
 	}
 }
+
+var readSinkA int
+
+func BenchmarkGet8uint32Fast(b *testing.B) {
+	in := []byte{
+		0x00, 0x04, 0x03, 0x02, 0x01, 0x00, 0x00, 0x00, 0x40,
+		0x0a, 0x0c, 0x00, 0x04,
+	}
+	for len(in) < 16 {
+		in = append(in, 0x00)
+	}
+
+	ctrl := uint16(0b01_00_00_11_00_00_00_01)
+	out := make([]uint32, 8)
+
+	read := 0
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		read = get8uint32(in, out, ctrl)
+	}
+	readSinkA = read
+}
+
+var readSinkB int
+
+func BenchmarkGet8uint32Scalar(b *testing.B) {
+	in := []byte{
+		0x00, 0x04, 0x03, 0x02, 0x01, 0x00, 0x00, 0x00, 0x40,
+		0x0a, 0x0c, 0x00, 0x04,
+	}
+
+	ctrl := uint16(0b01_00_00_11_00_00_00_01)
+	out := make([]uint32, 8)
+
+	read := 0
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		read = Get8uint32Scalar(in, out, ctrl)
+	}
+	readSinkB = read
+}
