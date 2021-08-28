@@ -10,11 +10,11 @@ import (
 const (
 	name = "get8uint32Fast"
 
-	pIn = "in"
-	pOut = "out"
+	pIn    = "in"
+	pOut   = "out"
 	pShufA = "shufA"
 	pShufB = "shufB"
-	pLenA = "lenA"
+	pLenA  = "lenA"
 )
 
 var (

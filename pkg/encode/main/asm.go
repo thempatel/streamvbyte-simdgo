@@ -15,12 +15,12 @@ const (
 	mask1111Str = "mask1111"
 	mask7F00Str = "mask7F00"
 
-	name = "put8uint32Fast"
-	pIn = "in"
-	pOut = "outBytes"
-	pShuffle = "shuffle"
+	name      = "put8uint32Fast"
+	pIn       = "in"
+	pOut      = "outBytes"
+	pShuffle  = "shuffle"
 	pLenTable = "lenTable"
-	pR = "r"
+	pR        = "r"
 )
 
 var (

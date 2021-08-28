@@ -29,7 +29,7 @@ func Put8uint32(in []uint32, out []byte) uint16 {
 	return putImpl(in, out)
 }
 
-func Put8uint32Scalar(in []uint32, out []byte ) uint16 {
+func Put8uint32Scalar(in []uint32, out []byte) uint16 {
 	var ctrl uint16
 	first := Put4uint32Scalar(in, out)
 	ctrl |= uint16(first)
@@ -38,7 +38,7 @@ func Put8uint32Scalar(in []uint32, out []byte ) uint16 {
 	return ctrl | uint16(second)<<8
 }
 
-func Put4uint32Scalar(in []uint32, out []byte ) uint8 {
+func Put4uint32Scalar(in []uint32, out []byte) uint8 {
 	// Drop the bounds checks
 	_ = in[3]
 
@@ -52,11 +52,11 @@ func Put4uint32Scalar(in []uint32, out []byte ) uint8 {
 	len2 := encodeOne(num2, out[len0+len1:])
 	len3 := encodeOne(num3, out[len0+len1+len2:])
 
-	return uint8((len0-1) | (len1-1) << 2 | (len2-1) << 4 | (len3-1) << 6)
+	return uint8((len0 - 1) | (len1-1)<<2 | (len2-1)<<4 | (len3-1)<<6)
 }
 
-func encodeOne(num uint32, out[]byte) int {
-	size := max(1, 4 - (bits.LeadingZeros32(num) / 8))
+func encodeOne(num uint32, out []byte) int {
+	size := max(1, 4-(bits.LeadingZeros32(num)/8))
 	binary.LittleEndian.PutUint32(out, num)
 	return size
 }

@@ -35,7 +35,7 @@ func Get8uint32(in []byte, out []uint32, ctrl uint16) int {
 }
 
 func Get8uint32Scalar(in []byte, out []uint32, ctrl uint16) int {
-	read := Get4uint32Scalar(in, out, uint8(ctrl & 0xff))
+	read := Get4uint32Scalar(in, out, uint8(ctrl&0xff))
 	return read + Get4uint32Scalar(in[read:], out[4:], uint8(ctrl>>8))
 }
 
@@ -59,7 +59,7 @@ func Get4uint32Scalar(in []byte, out []uint32, ctrl uint8) int {
 	out[n] = decodeOne(in[len0+len1+len2:], len3, buf)
 	n++
 
-	return int(len0+len1+len2+len3)
+	return int(len0 + len1 + len2 + len3)
 }
 
 func decodeOne(input []byte, size uint8, buf []byte) uint32 {
