@@ -82,6 +82,80 @@ lengths of a group of 4 32-bit numbers, hence Group Varint. 32-bit numbers only 
 to properly encode. This means that you can represent their lengths with 2 bits using a zero-indexed length
 i.e. 0, 1, 2, and 3 to represent numbers that require 1, 2, 3 and 4 bytes to encode, respectively.
 
+```go
+package foo
+
+// Nums in binary:
+//
+// 00000000 00000000 00000000 01101111  =        111 
+// 00000000 00000000 00000100 11010010  =       1234
+// 00000000 00001100 00001010 10000011  =     789123
+// 01000000 00000000 00000000 00000000  = 1073741824
+//
+// Num         Len      Control byte
+// ---------------------------------
+// 111          1               0b00 
+// 1234         2               0b01
+// 789123       3               0b10
+// 1073741824   4               0b11
+//
+// Final Control byte
+// 0b11100100
+//
+// Encoded data (little endian right-to-left) 
+// 0b01000000 0b00000000 0b00000000 0b00000000 0b00001100 0b00001010 0b10000011 0b00000100 0b11010010 0b01101111
+var (
+	Num1 uint32 = 111
+	Num2 uint32 = 1234
+	Num3 uint32 = 789_123
+	Num4 uint32 = 1_073_741_824
+)
+```
+
+You can then prefix every group of 4 encoded 32-bit numbers with their control byte and then use it during decoding.
+The obvious downside is that you pay a storage cost of one byte for every 4 numbers you want to encode. For 2^20 
+encoded numbers, that's an extra 256 KB of extra space: totally marginal. The great upside, though, is that
+you've now removed almost all branches from your decoding phase. You know exactly how many data bytes you need
+to read from a buffer for a particular number and then can use branchless decoding.
+
+```go
+package foo
+
+import (
+	"encoding/binary"
+)
+
+func decodeOne(input []byte, size uint8) uint32 {
+	buf := make([]byte, 4)
+	copy(buf, input[:size])
+
+	 // func (littleEndian) Uint32(b []byte) uint32 {
+	 // 	_ = b[3]
+	 // 	return uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24
+	 // }
+	return binary.LittleEndian.Uint32(buf)
+}
+
+func main() {
+	ctrl := uint8(0b11100100)
+	data := []byte{
+		0b01101111, 0b11010010, 0b00000100,
+		0b10000011, 0b00001010, 0b00001100,
+		0b00000000, 0b00000000, 0b00000000,
+		0b01000000, 
+    }
+    
+	len0 := (ctrl & 3) + 1      // 1
+	len1 := (ctrl >> 2 & 3) + 1 // 2
+	len2 := (ctrl >> 4 & 3) + 1 // 3
+	len3 := (ctrl >> 6 & 3) + 1 // 4
+	
+	_ = decodeOne(data, len0) // 111
+	_ = decodeOne(data, len1) // 1234
+	_ = decodeOne(data, len2) // 789_123
+	_ = decodeOne(data, len3) // 1_073_741_824
+}
+```
 
 # References
 
