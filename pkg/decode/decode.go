@@ -2,21 +2,12 @@ package decode
 
 import (
 	"encoding/binary"
-	"sync"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
 var (
 	getImpl Get8Impl
-
-	bufPool = sync.Pool{
-		New: func() interface{} {
-			buf := make([]byte, 4)
-			return &buf
-		},
-	}
-
 	zeroSlice = make([]byte, 4)
 )
 
@@ -41,29 +32,22 @@ func Get8uint32Scalar(in []byte, out []uint32, ctrl uint16) int {
 
 func Get4uint32Scalar(in []byte, out []uint32, ctrl uint8) int {
 	sizes := shared.PerNumLenTable[ctrl]
-	n := 0
-	buf := *(bufPool.Get().(*[]byte))
-	defer bufPool.Put(&buf)
 
 	len0 := sizes[0]
 	len1 := sizes[1]
 	len2 := sizes[2]
 	len3 := sizes[3]
 
-	out[n] = decodeOne(in, len0, buf)
-	n++
-	out[n] = decodeOne(in[len0:], len1, buf)
-	n++
-	out[n] = decodeOne(in[len0+len1:], len2, buf)
-	n++
-	out[n] = decodeOne(in[len0+len1+len2:], len3, buf)
-	n++
+	out[0] = decodeOne(in, len0)
+	out[1] = decodeOne(in[len0:], len1)
+	out[2] = decodeOne(in[len0+len1:], len2)
+	out[3] = decodeOne(in[len0+len1+len2:], len3)
 
 	return int(len0 + len1 + len2 + len3)
 }
 
-func decodeOne(input []byte, size uint8, buf []byte) uint32 {
+func decodeOne(input []byte, size uint8) uint32 {
+	buf := make([]byte, 4)
 	copy(buf, input[:size])
-	copy(buf[size:], zeroSlice)
 	return binary.LittleEndian.Uint32(buf)
 }
