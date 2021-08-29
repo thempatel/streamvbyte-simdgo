@@ -4,7 +4,7 @@ This is a repository that contains a port of Stream VByte to Go. Notably, this r
 to leverage SIMD techniques to achieve better performance. Currently, there is support for x86_64 architectures
 that have AVX and AVX2 hardware support. In cases where that is not available, or on non x86_64 architectures
 there is a portable scalar implementation. We also perform a runtime check to make sure that the necessary
-ISA are available and if not fallback to the scalar approach.
+ISA is available and if not fallback to the scalar approach.
 
 There are several existing implementations:
 
@@ -15,13 +15,10 @@ There are several existing implementations:
 
 ---
 Stream VByte uses the same underlying format as Google's Group Varint approach. Lemire et al. wanted
-to see if there was away to improve the performance even more and introduced a clever twist to enable
-better performance via SIMD techniques.
-
-The basic goal of the Group Varint format is to be able to compress integers and load them 
-really quickly. This has two advantages, you save space on disk and consequently save time
-when loading the compressed data into memory, since there is less of it. The way they achieve
-this compression is by improving upon the insight that backs the more basic VByte encoding.
+to see if there was a way to improve the performance even more and introduced a clever twist to enable
+better performance via SIMD techniques. The basic goal of the Group Varint format is to be able to
+achieve similar compression characteristics as the VByte format for integers and also be able to load
+and process them really quickly.
 
 ## VByte format
 
@@ -30,13 +27,10 @@ encode a 32-bit integer. Take for example an unsigned integer that is less than 
 integer will have bits set in the lowest byte of a 32-bit integer, while the remaining 3 bytes will
 simply be zeros.
 
-```go
-package foo
+```
+111 in binary:
 
-// Num in binary:
-//
-// 00000000 00000000 00000000 01101111
-var Num uint32 = 111
+00000000 00000000 00000000 01101111
 ```
 
 An approach you can take to compress this integer is to encode the integer using a variable
@@ -45,20 +39,16 @@ from the original integer, and then use the MSB as a continuation bit. If the MS
 is 1, then more bytes are needed to decode this particular integer. Below is an example where
 you might need 2 bytes to store the number 1234.
 
-```go
-package foo
+```
+1234 in binary:
 
-// Num in binary:
-//
-// 00000000 00000000 00000100 11010010
-//
-// Num compressed:
-//
-// 0|0001001| 1|1010010|
-// ^          ^ Continuation bits
-//
-//     ^           ^ Data bits
-var Num uint32 = 1234
+00000000 00000000 00000100 11010010
+
+Num compressed:
+
+0|0001001| 1|1010010|
+^          ^ Continuation bits
+    ^           ^ Data bits
 ```
 
 If you want to decode this integer, you simply build up the number iteratively. I.e. you OR the
@@ -81,34 +71,25 @@ lengths of a group of 4 32-bit integers, hence Group Varint. 32-bit integers onl
 to properly encode. This means that you can represent their lengths with 2 bits using a zero-indexed length
 i.e. 0, 1, 2, and 3 to represent integers that require 1, 2, 3 and 4 bytes to encode, respectively.
 
-```go
-package foo
+```
+00000000 00000000 00000000 01101111  =        111 
+00000000 00000000 00000100 11010010  =       1234
+00000000 00001100 00001010 10000011  =     789123
+01000000 00000000 00000000 00000000  = 1073741824
 
-// Nums in binary:
-//
-// 00000000 00000000 00000000 01101111  =        111 
-// 00000000 00000000 00000100 11010010  =       1234
-// 00000000 00001100 00001010 10000011  =     789123
-// 01000000 00000000 00000000 00000000  = 1073741824
-//
-// Num         Len      Control byte
-// ---------------------------------
-// 111          1               0b00 
-// 1234         2               0b01
-// 789123       3               0b10
-// 1073741824   4               0b11
-//
-// Final Control byte
-// 0b11100100
-//
-// Encoded data (little endian right-to-left) 
-// 0b01000000 0b00000000 0b00000000 0b00000000 0b00001100 0b00001010 0b10000011 0b00000100 0b11010010 0b01101111
-var (
-	Num1 uint32 = 111
-	Num2 uint32 = 1234
-	Num3 uint32 = 789_123
-	Num4 uint32 = 1_073_741_824
-)
+Num         Len      Control byte
+---------------------------------
+111          1               0b00 
+1234         2               0b01
+789123       3               0b10
+1073741824   4               0b11
+
+Final Control byte
+0b11100100
+
+Encoded data (little endian right-to-left bottom-to-top) 
+0b01000000 0b00000000 0b00000000 0b00000000 0b00001100
+0b00001010 0b10000011 0b00000100 0b11010010 0b01101111
 ```
 
 You can then prefix every group of 4 encoded 32-bit integers with their control byte and then use it during decoding.
@@ -178,7 +159,8 @@ to decode a variable number of integers that fit into an 8-byte register, i.e. t
 
 Lemire et al. have devised a brilliant SIMD algorithm for simultaneously generating two control bytes
 for a group of 8 integers. The best way to understand this algorithm is to understand how it works on 
-a single integer and then assume it works in a vectorized form (it does).
+a single integer and then assume it works in a vectorized form (it does). Going forward we'll use
+*control bits stream* to represent these control bytes we are building. 
 
 ```
 00000000 00000000 00000100 11010010 // 1234
@@ -191,113 +173,145 @@ that requires 2 bytes to be encoded, we want for the algorithm to generate `0b01
 
 ```
 00000000 00000000 00000100 11010010 // 1234
-00000001 00000001 00000001 00000001 // 1's mask
------------------------------------ // min(1234, 1's mask)
+00000001 00000001 00000001 00000001 // 0x1111 mask
+----------------------------------- // byte-min(1234, 0x1111)
 00000000 00000000 00000001 00000001
 ```
 
 The algorithm first uses a mask where every byte is equal to 1. If you perform a per-byte min operation
 on our integer and the 1's mask, the result will have a 1 at every byte that had a value in the original
-integer.
+integer. 
 
 ```
 00000000 00000000 00000001 00000001
------------------------------------ // pack saturating unsigned 16-bit to 8-bit
+----------------------------------- // pack unsigned saturating 16-bit to 8-bit
 00000000 00000000 00000000 11111111
 ```
 
-Now you perform a 16-bit to 8 bit unsigned saturating pack operation. Practically this means that you're
+Now you perform a 16-bit to 8-bit unsigned saturating pack operation. Practically this means that you're
 taking every 16-bit value and trying to shove that into 8 bits. If the 16-bit integer is larger than
-the largest number 8 bits can support, the pack saturates to the largest 8-bit value. Why this is
-performed will become more clear in the subsequent steps, however, at a high level you want the MSB
-of two consecutive bytes to be representative of the final 2-bit control. For example, if you have
-a 3-byte integer, you want the MSB of two consecutive bytes to be 1 and 0, in that order. This would
-represent the value `0b10`. 
+the largest unsigned integer 8 bits can support, the pack saturates to the largest unsigned 8-bit value. 
+
+Why this is performed will become more clear in the subsequent steps, however, at a high level, for every
+integer you want to encode, you want for the MSB of two consecutive bytes in the control bits stream
+to be representative of the final 2-bit control. For example, if you have a 3-byte integer, you want the
+MSB of two consecutive bytes to be 1 and 0, in that order. The reason you would want this is that
+there is a vector pack instruction that takes the MSB from every byte in the control bits stream
+and packs it into the lowest byte. This would thus represent the value `0b10` in the final byte for
+this 3-byte integer, which is what we want.
+
+Performing a 16-bit to 8-bit unsigned saturating pack has the effect that you can use the saturation
+behavior to conditionally turn on the MSB of these bytes depending on which bytes have values in the
+original 32-bit integer.
+
+```
+00000000 00000000 00000000 11111111 // control bits stream
+00000001 00000001 00000001 00000001 // 0x1111 mask
+----------------------------------- // signed 16-bit min
+00000000 00000000 00000000 11111111
+```
+
+We then take the 1's mask we used before and perform a __signed 16-bit__ min operation. The reason for this
+is more clear if you look at an example using a 3-byte integer.
+
+```
+00000000 00001100 00001010 10000011 // 789123
+00000001 00000001 00000001 00000001 // 0x1111 mask
+----------------------------------- // byte-min(789123, 0x1111)
+00000000 00000001 00000001 00000001
+----------------------------------- // pack unsigned saturating 16-bit to 8-bit
+00000000 00000000 00000001 11111111
+00000001 00000001 00000001 00000001 // 0x1111 mask
+----------------------------------- // signed 16-bit min
+00000000 00000000 00000001 00000001
+```
+
+The signed 16-bit min operation has three important effects.
+
+First, for 3-byte integers, it has the effect of turning off the MSB of the lowest byte. This is necessary
+because a 3-byte integer should have a control bit that is `0b10` and without this step using the MSB pack
+operation would result in a 2-bit control that looks something like `0b_1`, where the lowest bit is on.
+Obviously this is wrong, since only integers that require 2 or 4 bytes to encode should have that lower bit
+on, i.e. 1 or 3 as a zero-indexed length.
+
+Second, for 4-byte integers, the signed aspect has the effect of leaving both MSBs of the 2 bytes on. When using the
+MSB pack operation later on, it will result in a 2-bit control value of `0b11`, which is what we want.
+
+Third, for 1 and 2 byte integers, it has no effect. This is great for 2-byte values since the MSB will remain on
+and 1 byte values will not have any MSB on anyways so it is effectively a noop in both scenarios.
+
+```
+00000000 00000000 00000000 11111111 // control bits stream (original 1234)
+01111111 00000000 01111111 00000000 // 0x7F00 mask
+----------------------------------- // add unsigned saturating 16-bit
+01111111 00000000 01111111 11111111
+```
+
+Next, we take a mask with the value 0x7F00 and perform an unsigned saturating add to the control bits stream.
+In the case for the integer `1234` this has no real effect. We maintain the MSB in the lowest byte. You'll note,
+however, that the only byte that has its MSB on is the last one, so performing an MSB pack operation would result
+in a value of `0b0001`, which is what we want. An example of this step on the integer 789123 might paint a clearer
+picture.
+
+```
+00000000 00000000 00000001 00000001 // control bits stream (789123)
+01111111 00000000 01111111 00000000 // 0x7F00 mask
+----------------------------------- // add unsigned saturating 16-bit
+01111111 00000000 11111111 00000001
+```
+
+You'll note here that the addition of 0x01 with 0x7F in the upper byte results in the MSB of the resulting upper
+byte turning on. The MSB in the lower byte remains off and now an MSB pack operation will resolve to `0b0010`,
+which is what we want.
+
+```
+01111111 00000000 11111111 00000001 // control bits stream (789123)
+----------------------------------- // move byte mask 
+00000000 00000000 00000000 00000010 // 2-bit control 
+```
+
+The final move byte mask is performed on the control bits stream, and we now have the result we wanted. Now that you
+see that this works for 1 integer, you know how it can work for 8 integers simultaneously, since we use vector
+instructions that operate on 128 bit registers.
+
+### SIMD integer packing/unpacking
+
+The next problem to be solved is how to take a group of 4 integers, and compress it by removing extraneous/unused
+bytes so that all you're left with is a stream of data bytes with real information. Let's take our two numbers from
+our examples above.
+
+```
+               789123                                 1234
+00000000 00001100 00001010 10000011 | 00000000 00000000 00000100 11010010
+-------------------------------------------------------------------------
+         00001100 00001010 10000011   00000100 11010010      // packed
+```
+
+Here, we can use a shuffle operation. Vector shuffle operations rearrange the bytes in an input register according
+to some provided mask into a destination register. Every position in the mask stores an offset into the source
+vector stream that represents the data byte that should go into that position.
+
+```
+00000000 00001100 00001010 10000011 00000000 00000000 00000100 11010010 // input [1234, 789123] (little endian R-to-L)
+            |       |         |                             |        |
+            |       |         |____________________         |        |
+            |       |_____________________         |        |        |
+            |____________________         |        |        |        |
+                                 v        v        v        v        v
+    0xff     0xff     0xff     0x06     0x05     0x04     0x01     0x00 // mask in hex
+-----------------------------------------------------------------------
+00000000 00000000 00000000 00001100 00001010 10000011 00000100 11010010 // packed
+```
+
+We keep a prebuilt lookup table that contains a mapping from control byte to the necessary mask and simply
+load that after we construct the control byte above. In addition, we keep a lookup table for a mapping from
+control bytes to total encoded length. This allows us to know by how much to increment the output pointer and
+overwrite, for example, the redundant upper 3 bytes in the above shuffle example.
+
+Unpacking during decoding is the same as the above, but in reverse. We need to go from a packed format
+to an unpacked memory format. We keep lookup tables to maintain a mapping from control byte to the reverse
+shuffle mask, and then perform a shuffle operation to output to an uint32 array.
 
 # References
 
 [Stream VByte: Faster Byte-Oriented Integer Compression](https://arxiv.org/pdf/1709.08990.pdf)
-
-// 2-byte
-// 00000000 00000000 00000010 00001010 Value
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000000 00000000 00000001 00000001 min
-// 00000000 00000000 00000000 11111111 pack
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000000 00000000 00000000 11111111 16bit signed min
-// 01111111 00000000 01111111 00000000 7F00-mask
-// 01111111 00000000 01111111 11111111 Add 7F00-mask
-// 00000000 00000000 00000000 00000001 movemask
-
-
-
-// 4-byte
-// 00000001 00000000 00000000 00000000 Value
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000001 00000000 00000000 00000000 min
-// 00000000 00000000 11111111 00000000 pack
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000000 00000000 11111111 00000000 16bit signed min
-// 01111111 00000000 01111111 00000000 7F00-mask
-// 01111111 00000000 11111111 11111111 Add 7F00-mask
-// 00000000 00000000 00000000 00000011 movemask
-
-
-
-// 3-Byte
-// 00000000 00000010 00000010 00001010 Value
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000000 00000001 00000001 00000001 Min(value, 1's)
-//
-// 00000000 00000000 00000001 11111111 Pack(min)
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000000 00000000 00000001 00000001 16bit-min(packed-min)
-//
-// 01111111 00000000 01111111 00000000 7F00-mask
-// 01111111 00000000 10000000 00000001 Add 7F00-mask
-// 00000000 00000000 00000000 00000010 movemask
-
-
-// 4-Byte
-// 00000010 00000010 00000010 00001010 Value
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000001 00000001 00000001 00000001 Min(value, 1's)
-//
-// 00000000 00000000 11111111 11111111 Pack(min)
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000000 00000000 11111111 11111111 16bit-min(packed-min)
-//
-// 01111111 00000000 01111111 00000000 7F00-mask
-// 01111111 00000000 11111111 11111111 Add 7F00-mask
-// 00000000 00000000 00000000 00000011 movemask
-// --
-
-
-// ???
-// 00000010 00000010 00000000 00001010 Value
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000001 00000001 00000000 00000001 Min(value, 1's)
-//
-// 00000000 00000000 11111111 00000001 Pack(min)
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000000 00000000 11111111 00000001 16bit-min(packed-min)
-//
-// 01111111 00000000 01111111 00000000 7F00-mask
-// 01111111 00000000 11111111 11111111 Add 7F00-mask
-// 00000000 00000000 00000000 00000011 movemask
-
-
-
-
-// ???
-// 10000000 10000000 10000000 10000000 Value
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000001 00000001 00000001 00000001 Min(value, 1's)
-//
-// 11111111 11111111 11111111 11111111 Pack(min)
-// 00000001 00000001 00000001 00000001 1's Mask
-// 00000000 00000000 11111111 00000001 16bit-min(packed-min)
-//
-// 01111111 00000000 01111111 00000000 7F00-mask
-// 01111111 00000000 11111111 11111111 Add 7F00-mask
-// 00000000 00000000 00000000 00000011 movemask
