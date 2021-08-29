@@ -11,5 +11,5 @@ func GetMode() shared.PerformanceMode {
 }
 
 func get8uint32(in []byte, out []uint32, ctrl uint16) int {
-	panic("unimplemented")
+	panic("unreachable")
 }
