@@ -18,12 +18,17 @@ There are several existing implementations:
 ```
 goos: darwin
 goarch: amd64
+pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
+cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
+BenchmarkGet8uint32Fast-12      	195934500	         6.112 ns/op
+BenchmarkGet8uint32Scalar-12    	23029934	        52.48 ns/op
+
+goos: darwin
+goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
-BenchmarkPut8uint32Fast-12      	323402066	         3.728 ns/op
-BenchmarkPut8uint32Scalar-12    	46678537	        25.73 ns/op
-BenchmarkGet8uint32Fast-12      	196394230	         6.189 ns/op
-BenchmarkGet8uint32Scalar-12    	22687489	        52.63 ns/op
+BenchmarkPut8uint32Fast-12      	324639439	         3.711 ns/op
+BenchmarkPut8uint32Scalar-12    	46963490	        25.66 ns/op
 ```
 
 ---
