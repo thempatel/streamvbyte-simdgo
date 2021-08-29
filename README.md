@@ -2,7 +2,7 @@
 
 This is a repository that contains a port of Stream VByte to Go. Notably, this repo takes extra care
 to leverage SIMD techniques to achieve better performance. Currently, there is support for x86_64 architectures
-that have AVX and AVX2 hardware support. In cases where that is not available, or on non x86_64 architectures
+that have AVX and AVX2 hardware instructions. In cases where that is not available, or on non x86_64 architectures
 there is a portable scalar implementation. We also perform a runtime check to make sure that the necessary
 ISA is available and if not fallback to the scalar approach.
 
@@ -46,9 +46,9 @@ you might need 2 bytes to store the number 1234.
 
 Num compressed:
 
+v          v          Continuation bits
 0|0001001| 1|1010010|
-^          ^ Continuation bits
-    ^           ^ Data bits
+    ^           ^     Data bits
 ```
 
 If you want to decode this integer, you simply build up the number iteratively. I.e. you OR the
@@ -77,12 +77,12 @@ i.e. 0, 1, 2, and 3 to represent integers that require 1, 2, 3 and 4 bytes to en
 00000000 00001100 00001010 10000011  =     789123
 01000000 00000000 00000000 00000000  = 1073741824
 
-Num         Len      Control byte
----------------------------------
-111          1               0b00 
-1234         2               0b01
-789123       3               0b10
-1073741824   4               0b11
+Num         Len      2-bit control
+----------------------------------
+111          1                0b00 
+1234         2                0b01
+789123       3                0b10
+1073741824   4                0b11
 
 Final Control byte
 0b11100100
@@ -117,7 +117,7 @@ func decodeOne(input []byte, size uint8) uint32 {
 }
 
 func main() {
-	ctrl := uint8(0b11100100)
+	ctrl := uint8(0b11_10_01_00)
 	data := []byte{
 		0b01101111, 0b11010010, 0b00000100,
 		0b10000011, 0b00001010, 0b00001100,
@@ -238,7 +238,7 @@ Second, for 4-byte integers, the signed aspect has the effect of leaving both MS
 MSB pack operation later on, it will result in a 2-bit control value of `0b11`, which is what we want.
 
 Third, for 1 and 2 byte integers, it has no effect. This is great for 2-byte values since the MSB will remain on
-and 1 byte values will not have any MSB on anyways so it is effectively a noop in both scenarios.
+and 1 byte values will not have any MSB on anyways, so it is effectively a noop in both scenarios.
 
 ```
 00000000 00000000 00000000 11111111 // control bits stream (original 1234)
@@ -247,10 +247,10 @@ and 1 byte values will not have any MSB on anyways so it is effectively a noop i
 01111111 00000000 01111111 11111111
 ```
 
-Next, we take a mask with the value 0x7F00 and perform an unsigned saturating add to the control bits stream.
+Next, we take a mask with the value `0x7F00` and perform an unsigned saturating add to the control bits stream.
 In the case for the integer `1234` this has no real effect. We maintain the MSB in the lowest byte. You'll note,
 however, that the only byte that has its MSB on is the last one, so performing an MSB pack operation would result
-in a value of `0b0001`, which is what we want. An example of this step on the integer 789123 might paint a clearer
+in a value of `0b0001`, which is what we want. An example of this step on the integer `789123` might paint a clearer
 picture.
 
 ```
@@ -260,9 +260,30 @@ picture.
 01111111 00000000 11111111 00000001
 ```
 
-You'll note here that the addition of 0x01 with 0x7F in the upper byte results in the MSB of the resulting upper
+You'll note here that the addition of `0x01` with `0x7F` in the upper byte results in the MSB of the resulting upper
 byte turning on. The MSB in the lower byte remains off and now an MSB pack operation will resolve to `0b0010`,
-which is what we want.
+which is what we want. The unsigned saturation behavior is really important for 4-byte numbers that only have
+bits in the most significant byte on. An example below:
+
+```
+01000000 00000000 00000000 00000000 // 1073741824
+00000001 00000001 00000001 00000001 // 0x1111 mask
+----------------------------------- // byte-min(1073741824, 0x1111)
+00000001 00000000 00000000 00000000
+----------------------------------- // pack unsigned saturating 16-bit to 8-bit
+00000000 00000000 11111111 00000000
+00000001 00000001 00000001 00000001 // 0x1111 mask
+----------------------------------- // signed 16-bit min
+00000000 00000000 11111111 00000000
+01111111 00000000 01111111 00000000 // 0x7F00 mask
+----------------------------------- // add unsigned saturating 16-bit
+01111111 00000000 11111111 11111111
+```
+
+Note here that because only the upper byte had a value in it, the lowest byte in the control bits stream remains
+zero for the duration of the algorithm. This poses an issue, since for a 4-byte value, we want for the 2-bit
+control to result in a value of `0b11`. Performing a 16-bit unsigned *saturating* addition has the effect of
+turning on all bits in the lower byte, and thus we get a result with the MSB in the lower byte on. 
 
 ```
 01111111 00000000 11111111 00000001 // control bits stream (789123)
@@ -277,7 +298,7 @@ instructions that operate on 128 bit registers.
 ### SIMD integer packing/unpacking
 
 The next problem to be solved is how to take a group of 4 integers, and compress it by removing extraneous/unused
-bytes so that all you're left with is a stream of data bytes with real information. Let's take our two numbers from
+bytes so that all you're left with is a stream of data bytes with real information. Let's take two numbers from
 our examples above.
 
 ```
@@ -311,7 +332,7 @@ overwrite, for example, the redundant upper 3 bytes in the above shuffle example
 
 Unpacking during decoding is the same as the above, but in reverse. We need to go from a packed format
 to an unpacked memory format. We keep lookup tables to maintain a mapping from control byte to the reverse
-shuffle mask, and then perform a shuffle operation to output to an uint32 array.
+shuffle mask, and then perform a shuffle operation to output to an `uint32` array.
 
 # References
 
