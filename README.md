@@ -13,6 +13,19 @@ There are several existing implementations:
 3. [Go](https://github.com/nelz9999/stream-vbyte-go)
    * Note: only has a scalar implementation which prompted this implementation with SIMD techniques.
 
+## Benchmarks
+
+```
+goos: darwin
+goarch: amd64
+pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
+cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
+BenchmarkPut8uint32Fast-12      	323402066	         3.728 ns/op
+BenchmarkPut8uint32Scalar-12    	46678537	        25.73 ns/op
+BenchmarkGet8uint32Fast-12      	196394230	         6.189 ns/op
+BenchmarkGet8uint32Scalar-12    	22687489	        52.63 ns/op
+```
+
 ---
 Stream VByte uses the same underlying format as Google's Group Varint approach. Lemire et al. wanted
 to see if there was a way to improve the performance even more and introduced a clever twist to enable
