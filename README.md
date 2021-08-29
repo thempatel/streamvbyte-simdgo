@@ -292,7 +292,8 @@ to some provided mask into a destination register. Every position in the mask st
 vector stream that represents the data byte that should go into that position.
 
 ```
-00000000 00001100 00001010 10000011 00000000 00000000 00000100 11010010 // input [1234, 789123] (little endian R-to-L)
+input [1234, 789123] (little endian R-to-L)
+00000000 00001100 00001010 10000011 00000000 00000000 00000100 11010010
             |       |         |                             |        |
             |       |         |____________________         |        |
             |       |_____________________         |        |        |
