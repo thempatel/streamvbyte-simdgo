@@ -5,7 +5,14 @@ import (
 	"math/rand"
 	"reflect"
 	"testing"
+	"time"
+
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/randutils"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func TestGet8uint32Scalar(t *testing.T) {
 	in := []byte{
@@ -115,7 +122,7 @@ func generate8Varint() []byte {
 	)
 
 	for i := 0; i < count; i++ {
-		size := binary.PutUvarint(buf, uint64(rand.Uint32()))
+		size := binary.PutUvarint(buf, uint64(randutils.RandUint32()))
 		data = append(data, buf[:size]...)
 		written += size
 	}

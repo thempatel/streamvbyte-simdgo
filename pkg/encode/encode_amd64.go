@@ -21,6 +21,7 @@ func put8uint32(in []uint32, out []byte) uint16 {
 	)
 }
 
+//go:noescape
 func put8uint32Fast(
 	in []uint32, outBytes []byte,
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
