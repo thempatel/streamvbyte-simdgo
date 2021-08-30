@@ -10,12 +10,7 @@ package randutils
 import (
 	"math"
 	"math/rand"
-	"time"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 type generator func() uint32
 

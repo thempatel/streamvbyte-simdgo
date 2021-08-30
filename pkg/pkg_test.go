@@ -1,13 +1,19 @@
 package pkg
 
 import (
+	"math/rand"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/decode"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/randutils"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func TestRoundTripScalar(t *testing.T) {
 	in := []uint32{1024, 3, 2, 1, 1_073_741_824, 10, 12, 1024}

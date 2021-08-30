@@ -2,11 +2,17 @@ package decode
 
 import (
 	"encoding/binary"
+	"math/rand"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/randutils"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func TestGet8uint32Scalar(t *testing.T) {
 	in := []byte{
