@@ -62,7 +62,7 @@ func TestPut8uint32Fast(t *testing.T) {
 	}
 }
 
-var ctrlSinkA uint16
+var writeSinkA uint16
 
 func BenchmarkPut8uint32Fast(b *testing.B) {
 	count := 8
@@ -78,10 +78,10 @@ func BenchmarkPut8uint32Fast(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ctrl = put8uint32(nums, out)
 	}
-	ctrlSinkA = ctrl
+	writeSinkA = ctrl
 }
 
-var ctrlSinkB uint16
+var writeSinkB uint16
 
 func BenchmarkPut8uint32Scalar(b *testing.B) {
 	count := 8
@@ -97,10 +97,10 @@ func BenchmarkPut8uint32Scalar(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ctrl = Put8uint32Scalar(nums, out)
 	}
-	ctrlSinkB = ctrl
+	writeSinkB = ctrl
 }
 
-var sinkC int
+var writeSinkC int
 
 func BenchmarkPut8uint32Varint(b *testing.B) {
 	count := 8
@@ -117,7 +117,7 @@ func BenchmarkPut8uint32Varint(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		written = write8Varint(nums, out)
 	}
-	sinkC = written
+	writeSinkC = written
 }
 
 func write8Varint(nums []uint32, out []byte) int {
