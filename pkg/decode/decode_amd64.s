@@ -2,19 +2,36 @@
 
 #include "textflag.h"
 
-// func get8uint32Fast(in []byte, out []uint32, shufA *[16]uint8, shufB *[16]uint8, lenA uint8)
+// func get8uint32Fast(in []byte, out []uint32, ctrl uint16, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint64)
 // Requires: AVX
-TEXT ·get8uint32Fast(SB), NOSPLIT, $0-72
-	MOVQ    shufA+48(FP), AX
-	MOVQ    shufB+56(FP), CX
-	MOVQ    in_base+0(FP), DX
-	MOVQ    DX, BX
-	MOVBQZX lenA+64(FP), SI
-	ADDQ    SI, BX
-	VLDDQU  (DX), X0
-	VLDDQU  (BX), X1
-	VPSHUFB (AX), X0, X0
-	VPSHUFB (CX), X1, X1
+TEXT ·get8uint32Fast(SB), NOSPLIT, $0-80
+	MOVWQZX ctrl+48(FP), AX
+	MOVQ    shuffle+56(FP), CX
+	MOVBQZX AL, DX
+	SHLQ    $0x04, DX
+	ADDQ    CX, DX
+	MOVWQZX AX, BX
+	SHRQ    $0x08, BX
+	SHLQ    $0x04, BX
+	ADDQ    CX, BX
+	MOVQ    in_base+0(FP), CX
+	MOVQ    CX, SI
+	MOVQ    lenTable+64(FP), DI
+	MOVBQZX AL, R8
+	ADDQ    DI, R8
+	MOVBQZX (R8), R8
+	ADDQ    R8, SI
+	MOVQ    lenTable+64(FP), DI
+	MOVWQZX AX, AX
+	SHRQ    $0x08, AX
+	ADDQ    DI, AX
+	MOVBQZX (AX), AX
+	ADDQ    AX, R8
+	MOVQ    R8, r+72(FP)
+	VLDDQU  (CX), X0
+	VLDDQU  (SI), X1
+	VPSHUFB (DX), X0, X0
+	VPSHUFB (BX), X1, X1
 	MOVQ    out_base+24(FP), AX
 	VMOVDQU X0, (AX)
 	VMOVDQU X1, 16(AX)
