@@ -20,15 +20,17 @@ goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
-BenchmarkGet8uint32Fast-12      	319653280	         3.754 ns/op
-BenchmarkGet8uint32Scalar-12    	22984789	        51.96 ns/op
+BenchmarkGet8uint32Fast-12      	315457458	         3.808 ns/op	8403.62 MB/s
+BenchmarkGet8uint32Scalar-12    	22839368	        52.67 ns/op	 607.57 MB/s
+BenchmarkGet8uint32Varint-12    	21459482	        56.23 ns/op	 569.07 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
-BenchmarkPut8uint32Fast-12      	324639439	         3.711 ns/op
-BenchmarkPut8uint32Scalar-12    	46963490	        25.66 ns/op
+BenchmarkPut8uint32Fast-12      	320733799	         3.745 ns/op	8544.96 MB/s
+BenchmarkPut8uint32Scalar-12    	46435694	        25.66 ns/op	1246.90 MB/s
+BenchmarkPut8uint32Varint-12    	44864949	        26.81 ns/op	1193.64 MB/s
 ```
 
 ---

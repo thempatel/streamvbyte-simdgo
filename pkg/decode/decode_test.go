@@ -1,6 +1,8 @@
 package decode
 
 import (
+	"encoding/binary"
+	"math/rand"
 	"reflect"
 	"testing"
 )
@@ -62,6 +64,7 @@ func BenchmarkGet8uint32Fast(b *testing.B) {
 	out := make([]uint32, 8)
 
 	read := 0
+	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		read = get8uint32(in, out, ctrl)
@@ -81,9 +84,50 @@ func BenchmarkGet8uint32Scalar(b *testing.B) {
 	out := make([]uint32, 8)
 
 	read := 0
+	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		read = Get8uint32Scalar(in, out, ctrl)
 	}
 	readSinkB = read
+}
+
+var readSinkC int
+
+func BenchmarkGet8uint32Varint(b *testing.B) {
+	data := generate8Varint()
+
+	read := 0
+	b.SetBytes(32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		read = decode8Varint(data)
+	}
+	readSinkC = read
+}
+
+func generate8Varint() []byte {
+	count := 8
+	var (
+		data []byte
+		written int
+		buf = make([]byte, binary.MaxVarintLen32)
+	)
+
+	for i := 0; i < count; i++ {
+		size := binary.PutUvarint(buf, uint64(rand.Uint32()))
+		data = append(data, buf[:size]...)
+		written += size
+	}
+
+	return data[:written]
+}
+
+func decode8Varint(data []byte) int {
+	pos := 0
+	for i := 0; i < 8; i++ {
+		_, read := binary.Uvarint(data[pos:])
+		pos += read
+	}
+	return pos
 }

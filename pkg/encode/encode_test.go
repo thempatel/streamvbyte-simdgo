@@ -1,6 +1,7 @@
 package encode
 
 import (
+	"encoding/binary"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -40,7 +41,7 @@ func TestPut8uint32Fast(t *testing.T) {
 
 	count := 8
 	nums := make([]uint32, count)
-	for i := 0; i < 8; i++ {
+	for i := 0; i < count; i++ {
 		nums[i] = rand.Uint32()
 	}
 
@@ -61,7 +62,7 @@ func TestPut8uint32Fast(t *testing.T) {
 	}
 }
 
-var ctrlSinkA uint16
+var writeSinkA uint16
 
 func BenchmarkPut8uint32Fast(b *testing.B) {
 	count := 8
@@ -72,27 +73,59 @@ func BenchmarkPut8uint32Fast(b *testing.B) {
 	out := make([]byte, MaxBytesPerNum*count)
 
 	var ctrl uint16
+	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ctrl = put8uint32(nums, out)
 	}
-	ctrlSinkA = ctrl
+	writeSinkA = ctrl
 }
 
-var ctrlSinkB uint16
+var writeSinkB uint16
 
 func BenchmarkPut8uint32Scalar(b *testing.B) {
 	count := 8
 	nums := make([]uint32, count)
-	for i := 0; i < 8; i++ {
+	for i := 0; i < count; i++ {
 		nums[i] = rand.Uint32()
 	}
 	out := make([]byte, MaxBytesPerNum*count)
 
 	var ctrl uint16
+	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ctrl = Put8uint32Scalar(nums, out)
 	}
-	ctrlSinkB = ctrl
+	writeSinkB = ctrl
+}
+
+var writeSinkC int
+
+func BenchmarkPut8uint32Varint(b *testing.B) {
+	count := 8
+	nums := make([]uint32, count)
+	for i := 0; i < count; i++ {
+		nums[i] = rand.Uint32()
+	}
+
+	out := make([]byte, binary.MaxVarintLen32*count)
+	written := 0
+
+	b.SetBytes(32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		written = write8Varint(nums, out)
+	}
+	writeSinkC = written
+}
+
+func write8Varint(nums []uint32, out []byte) int {
+	pos := 0
+	for i := range nums {
+		size := binary.PutUvarint(out[pos:], uint64(nums[i]))
+		pos += size
+	}
+
+	return pos
 }
