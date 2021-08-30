@@ -15,10 +15,10 @@ func GetMode() shared.PerformanceMode {
 }
 
 func put8uint32(in []uint32, out []byte) uint16 {
-	// bounds check to prevent undefined behavior
-	_ = in[7]
-	_ = out[31]
-	return put8uint32Fast(in, out, shared.EncodeShuffleTable, shared.PerControlLenTable)
+	return put8uint32Fast(in, out,
+		shared.EncodeShuffleTable,
+		shared.PerControlLenTable,
+	)
 }
 
 func put8uint32Fast(
