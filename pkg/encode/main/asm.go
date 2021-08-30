@@ -31,7 +31,6 @@ var (
 
 func main() {
 	TEXT(name, NOSPLIT, signature)
-	Doc("put8uint32Fast encodes 8 32-bit unsigned integers at a time.")
 
 	mask1111R := ConstData(mask1111Str, operand.U16(mask1111))
 	mask7F00R := ConstData(mask7F00Str, operand.U16(mask7F00))

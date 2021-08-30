@@ -8,7 +8,6 @@ import (
 
 var (
 	getImpl Get8Impl
-	zeroSlice = make([]byte, 4)
 )
 
 type Get8Impl func(in []byte, out []uint32, ctrl uint16) int

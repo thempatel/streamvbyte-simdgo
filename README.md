@@ -20,8 +20,8 @@ goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
-BenchmarkGet8uint32Fast-12      	195934500	         6.112 ns/op
-BenchmarkGet8uint32Scalar-12    	23029934	        52.48 ns/op
+BenchmarkGet8uint32Fast-12      	319653280	         3.754 ns/op
+BenchmarkGet8uint32Scalar-12    	22984789	        51.96 ns/op
 
 goos: darwin
 goarch: amd64
@@ -247,7 +247,7 @@ is more clear if you look at an example using a 3-byte integer.
 The signed 16-bit min operation has three important effects.
 
 First, for 3-byte integers, it has the effect of turning off the MSB of the lowest byte. This is necessary
-because a 3-byte integer should have a control bit that is `0b10` and without this step using the MSB pack
+because a 3-byte integer should have a 2-bit control that is `0b10` and without this step using the MSB pack
 operation would result in a 2-bit control that looks something like `0b_1`, where the lowest bit is on.
 Obviously this is wrong, since only integers that require 2 or 4 bytes to encode should have that lower bit
 on, i.e. 1 or 3 as a zero-indexed length.
