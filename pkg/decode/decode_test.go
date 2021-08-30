@@ -2,9 +2,10 @@ package decode
 
 import (
 	"encoding/binary"
-	"math/rand"
 	"reflect"
 	"testing"
+
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/randutils"
 )
 
 func TestGet8uint32Scalar(t *testing.T) {
@@ -115,7 +116,7 @@ func generate8Varint() []byte {
 	)
 
 	for i := 0; i < count; i++ {
-		size := binary.PutUvarint(buf, uint64(rand.Uint32()))
+		size := binary.PutUvarint(buf, uint64(randutils.RandUint32()))
 		data = append(data, buf[:size]...)
 		written += size
 	}

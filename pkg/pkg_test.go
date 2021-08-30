@@ -6,6 +6,7 @@ import (
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/decode"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/randutils"
 )
 
 func TestRoundTripScalar(t *testing.T) {
@@ -37,5 +38,20 @@ func TestRoundTripScalar(t *testing.T) {
 
 	if !reflect.DeepEqual(in, decoded) {
 		t.Fatalf("expected %+v, actual %+v", in, decoded)
+	}
+}
+
+func BenchmarkCopy(b *testing.B) {
+	count := 8
+	nums := make([]uint32, count)
+	for i := 0; i < count; i++ {
+		nums[i] = randutils.RandUint32()
+	}
+
+	dest := make([]uint32, count)
+	b.SetBytes(32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		copy(dest, nums)
 	}
 }
