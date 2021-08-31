@@ -14,6 +14,6 @@ func get8uint32(in []byte, out []uint32, ctrl uint16) int {
 	panic("unreachable")
 }
 
-func get8uint32Diff(in []byte, out[]uint32, ctrl uint16, prev uint32) int {
+func get8uint32Diff(in []byte, out []uint32, ctrl uint16, prev uint32) int {
 	panic("unreachable")
 }

@@ -21,7 +21,7 @@ func get8uint32(in []byte, out []uint32, ctrl uint16) int {
 	))
 }
 
-func get8uint32Diff(in []byte, out[]uint32, ctrl uint16, prev uint32) int {
+func get8uint32Diff(in []byte, out []uint32, ctrl uint16, prev uint32) int {
 	return int(get8uint32DiffFast(
 		in, out, ctrl, prev,
 		shared.DecodeShuffleTable,
