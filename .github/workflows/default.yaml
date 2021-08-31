@@ -1,4 +1,4 @@
-name: Test
+name: Basic Checks
 on:
   push:
     branches:
@@ -11,5 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: test
-        run: go test ./pkg/...
+      - name: Test
+        run: make test
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate check
+        run: ./tools/generate_and_check.sh
