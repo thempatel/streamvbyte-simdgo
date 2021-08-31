@@ -1,4 +1,4 @@
-package randutils
+package util
 
 // This file provides a more uniform random number generator that creates
 // numbers that have a more normal distribution along the number of bytes
