@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	. "github.com/mmcloughlin/avo/build"
 	"github.com/mmcloughlin/avo/operand"
@@ -9,17 +10,13 @@ import (
 )
 
 const (
-	mask1111 uint16 = 0x1111
-	mask7F00 uint16 = 0x7F00
-
-	mask1111Str = "mask1111"
-	mask7F00Str = "mask7F00"
-
 	name      = "put8uint32Fast"
+	nameDiff  = "put8uint32DiffFast"
 	pIn       = "in"
 	pOut      = "outBytes"
 	pShuffle  = "shuffle"
 	pLenTable = "lenTable"
+	pPrev     = "prev"
 	pR        = "r"
 )
 
@@ -27,27 +24,51 @@ var (
 	signature = fmt.Sprintf(
 		"func(%s []uint32, %s []byte, %s *[256][16]uint8, %s *[256]uint8) (%s uint16)",
 		pIn, pOut, pShuffle, pLenTable, pR)
+
+	signatureDiff = fmt.Sprintf(
+		"func(%s []uint32, %s []byte, %s uint32, %s *[256][16]uint8, %s *[256]uint8) (%s uint16)",
+		pIn, pOut, pPrev, pShuffle, pLenTable, pR)
+
+	mask1111R = ConstData("mask0101", operand.U16(0x0101))
+	mask7F00R = ConstData("mask7F00", operand.U16(0x7F00))
 )
 
 func main() {
+	regular()
+	differential()
+	Generate()
+}
+
+func differential() {
+	TEXT(nameDiff, NOSPLIT, signatureDiff)
+
+	prevSingular, err := Param(pPrev).Resolve()
+	if err != nil {
+		log.Fatalf("failed to get addr of prev")
+	}
+
+	firstFour, secondFour := load8(pIn)
+	prev := XMM()
+	VPALIGNR(operand.Imm(12), firstFour, secondFour, prev)
+	VPSUBD(prev, secondFour, secondFour)
+
+	VBROADCASTSS(prevSingular.Addr, prev)
+	VPALIGNR(operand.Imm(12), prev, firstFour, prev)
+	VPSUBD(prev, firstFour, firstFour)
+
+	coreAlgorithm(firstFour, secondFour)
+}
+
+func regular() {
 	TEXT(name, NOSPLIT, signature)
+	coreAlgorithm(load8(pIn))
+}
 
-	mask1111R := ConstData(mask1111Str, operand.U16(mask1111))
-	mask7F00R := ConstData(mask7F00Str, operand.U16(mask7F00))
-
+func coreAlgorithm(firstFour, secondFour reg.VecVirtual) {
 	onesMask := XMM()
 	sevenFzerozero := XMM()
 	VPBROADCASTW(mask1111R, onesMask)
 	VPBROADCASTW(mask7F00R, sevenFzerozero)
-
-	arrBase := operand.Mem{Base: Load(Param(pIn).Base(), GP64())}
-
-	firstFour := XMM()
-	secondFour := XMM()
-	// load first 4 uint32's
-	VLDDQU(arrBase, firstFour)
-	// load second 4 uint32's
-	VLDDQU(arrBase.Offset(16), secondFour)
 
 	minFirstFour := XMM()
 	minSecondFour := XMM()
@@ -75,7 +96,7 @@ func main() {
 	secondAddr := GP64()
 	MOVQ(firstAddr, secondAddr)
 
-	lenValue := loadLenValue(ctrl)
+	lenValue := loadLenValue(pLenTable, ctrl)
 
 	MOVBQZX(operand.Mem{Base: lenValue}, lenValue)
 	ADDQ(lenValue, secondAddr)
@@ -84,7 +105,18 @@ func main() {
 	VMOVDQU(secondFour, operand.Mem{Base: secondAddr})
 
 	RET()
-	Generate()
+}
+
+func load8(paramName string) (reg.VecVirtual, reg.VecVirtual) {
+	arrBase := operand.Mem{
+		Base: Load(Param(paramName).Base(), GP64()),
+	}
+	firstFour := XMM()
+	secondFour := XMM()
+	VLDDQU(arrBase, firstFour)
+	VLDDQU(arrBase.Offset(16), secondFour)
+
+	return firstFour, secondFour
 }
 
 func loadCtrl16Shuffle(shuffleBase reg.Register, ctrl reg.GPVirtual, upper bool) reg.VecVirtual {
@@ -105,8 +137,8 @@ func loadCtrl16Shuffle(shuffleBase reg.Register, ctrl reg.GPVirtual, upper bool)
 	return shuffle
 }
 
-func loadLenValue(ctrl reg.GPVirtual) reg.GPVirtual {
-	lt := Load(Param(pLenTable), GP64())
+func loadLenValue(paramName string, ctrl reg.GPVirtual) reg.GPVirtual {
+	lt := Load(Param(paramName), GP64())
 	lenValue := GP64()
 	MOVBQZX(ctrl.As8L(), lenValue)
 	ADDQ(lt, lenValue)

@@ -1,5 +1,7 @@
 # Stream VByte SIMD Go
 
+![Tests](https://github.com/theMPatel/streamvbyte-simdgo/actions/workflows/default.yaml/badge.svg)
+
 This is a repository that contains a port of Stream VByte to Go. Notably, this repo takes extra care
 to leverage SIMD techniques to achieve better performance. Currently, there is support for x86_64 architectures
 that have AVX and AVX2 hardware instructions. In cases where that is not available, or on non x86_64 architectures
@@ -21,25 +23,28 @@ goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkCopy-12    	464632759	         2.596 ns/op	12325.59 MB/s
+BenchmarkCopy-12    	465074793	         2.583 ns/op	12389.15 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkGet8uint32Fast-12      	331059222	         3.626 ns/op	8825.75 MB/s
-BenchmarkGet8uint32Scalar-12    	27158302	        56.24 ns/op	 568.97 MB/s
-BenchmarkGet8uint32Varint-12    	26955727	        46.30 ns/op	 691.11 MB/s
+BenchmarkGet8uint32Fast-12      	329611804	         3.835 ns/op	8343.77 MB/s
+BenchmarkGet8uint32Scalar-12    	25492189	        50.71 ns/op	 630.99 MB/s
+BenchmarkGet8uint32Varint-12    	26470647	        50.98 ns/op	 627.66 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkPut8uint32Fast-12      	310279350	         3.861 ns/op	8288.35 MB/s
-BenchmarkPut8uint32Scalar-12    	47608422	        25.47 ns/op	1256.28 MB/s
-BenchmarkPut8uint32Varint-12    	58195945	        20.93 ns/op	1529.03 MB/s
+BenchmarkPut8uint32Fast-12          	308682210	         3.879 ns/op	8248.88 MB/s
+BenchmarkPut8uint32DiffFast-12      	277020394	         4.340 ns/op	7373.67 MB/s
+BenchmarkPut8uint32Scalar-12        	46843167	        25.54 ns/op	1252.79 MB/s
+BenchmarkPut8uint32DiffScalar-12    	45656731	        26.57 ns/op	1204.34 MB/s
+BenchmarkPut8uint32Varint-12        	65019252	        24.43 ns/op	1309.80 MB/s
+BenchmarkPut8uint32DiffVarint-12    	59314393	        18.08 ns/op	1770.31 MB/s
 ```
 
 A note on the benchmarks: An array of random uint32's is generated and then encoded/decoded over

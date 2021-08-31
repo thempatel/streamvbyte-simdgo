@@ -11,12 +11,12 @@ import (
 const (
 	name = "get8uint32Fast"
 
-	pIn    = "in"
-	pOut   = "out"
-	pCtrl  = "ctrl"
-	pShuffle = "shuffle"
-	pLenTable  = "lenTable"
-	pR 			= "r"
+	pIn       = "in"
+	pOut      = "out"
+	pCtrl     = "ctrl"
+	pShuffle  = "shuffle"
+	pLenTable = "lenTable"
+	pR        = "r"
 )
 
 var (
