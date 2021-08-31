@@ -1,7 +1,6 @@
 package encode
 
 import (
-	"encoding/binary"
 	"math/bits"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
@@ -83,7 +82,19 @@ func Put4uint32DiffScalar(in []uint32, out []byte, prev uint32) uint8 {
 
 func encodeOne(num uint32, out []byte) int {
 	size := max(1, 4-(bits.LeadingZeros32(num)/8))
-	binary.LittleEndian.PutUint32(out, num)
+	switch size {
+	case 4:
+		out[3] = byte(num >> 24)
+		fallthrough
+	case 3:
+		out[2] = byte(num >> 16)
+		fallthrough
+	case 2:
+		out[1] = byte(num >> 8)
+		fallthrough
+	case 1:
+		out[0] = byte(num)
+	}
 	return size
 }
 
