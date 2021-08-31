@@ -21,26 +21,32 @@ goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkCopy-12    	464051004	         2.584 ns/op	12381.91 MB/s
+BenchmarkCopy-12    	464632759	         2.596 ns/op	12325.59 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkGet8uint32Fast-12      	315457458	         3.808 ns/op	8403.62 MB/s
-BenchmarkGet8uint32Scalar-12    	22839368	        52.67 ns/op	 607.57 MB/s
-BenchmarkGet8uint32Varint-12    	21459482	        56.23 ns/op	 569.07 MB/s
+BenchmarkGet8uint32Fast-12      	331059222	         3.626 ns/op	8825.75 MB/s
+BenchmarkGet8uint32Scalar-12    	27158302	        56.24 ns/op	 568.97 MB/s
+BenchmarkGet8uint32Varint-12    	26955727	        46.30 ns/op	 691.11 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkPut8uint32Fast-12      	320733799	         3.745 ns/op	8544.96 MB/s
-BenchmarkPut8uint32Scalar-12    	46435694	        25.66 ns/op	1246.90 MB/s
-BenchmarkPut8uint32Varint-12    	44864949	        26.81 ns/op	1193.64 MB/s
+BenchmarkPut8uint32Fast-12      	310279350	         3.861 ns/op	8288.35 MB/s
+BenchmarkPut8uint32Scalar-12    	47608422	        25.47 ns/op	1256.28 MB/s
+BenchmarkPut8uint32Varint-12    	58195945	        20.93 ns/op	1529.03 MB/s
 ```
+
+A note on the benchmarks: An array of random uint32's is generated and then encoded/decoded over
+and over again. In this case, the processor is able to predict the branches in the Varint code paths
+really well, since the input numbers never change. The resulting speed improvements reflect that, and
+likely to a larger extent, that Varint is a faster algorithm for smaller numbers. The benchmark
+numbers favor the scalar approach as the size of the input integers goes up.
 
 ---
 Stream VByte uses the same underlying format as Google's Group Varint approach. Lemire et al. wanted

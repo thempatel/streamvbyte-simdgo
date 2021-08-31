@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/theMPatel/streamvbyte-simdgo/pkg/randutils"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
 
 func init() {
@@ -41,10 +41,7 @@ func TestPut8uint32Fast(t *testing.T) {
 	}
 
 	count := 8
-	nums := make([]uint32, count)
-	for i := 0; i < count; i++ {
-		nums[i] = randutils.RandUint32()
-	}
+	nums := util.GenUint32(count)
 
 	out := make([]byte, MaxBytesPerNum*count)
 	scalarCtrl := Put8uint32Scalar(nums, out)
@@ -67,10 +64,7 @@ var writeSinkA uint16
 
 func BenchmarkPut8uint32Fast(b *testing.B) {
 	count := 8
-	nums := make([]uint32, count)
-	for i := 0; i < count; i++ {
-		nums[i] = randutils.RandUint32()
-	}
+	nums := util.GenUint32(count)
 	out := make([]byte, MaxBytesPerNum*count)
 
 	var ctrl uint16
@@ -86,10 +80,7 @@ var writeSinkB uint16
 
 func BenchmarkPut8uint32Scalar(b *testing.B) {
 	count := 8
-	nums := make([]uint32, count)
-	for i := 0; i < count; i++ {
-		nums[i] = randutils.RandUint32()
-	}
+	nums := util.GenUint32(count)
 	out := make([]byte, MaxBytesPerNum*count)
 
 	var ctrl uint16
@@ -105,10 +96,7 @@ var writeSinkC int
 
 func BenchmarkPut8uint32Varint(b *testing.B) {
 	count := 8
-	nums := make([]uint32, count)
-	for i := 0; i < count; i++ {
-		nums[i] = randutils.RandUint32()
-	}
+	nums := util.GenUint32(count)
 
 	out := make([]byte, binary.MaxVarintLen32*count)
 	written := 0
