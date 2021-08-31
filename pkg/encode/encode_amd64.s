@@ -27,14 +27,12 @@ TEXT ·put8uint32Fast(SB), NOSPLIT, $0-66
 	MOVBQZX      AL, DX
 	SHLQ         $0x04, DX
 	ADDQ         CX, DX
-	VLDDQU       (DX), X2
-	MOVWQZX      AX, DX
-	SHRQ         $0x08, DX
-	SHLQ         $0x04, DX
-	ADDQ         CX, DX
-	VLDDQU       (DX), X3
-	VPSHUFB      X2, X0, X0
-	VPSHUFB      X3, X1, X1
+	MOVWQZX      AX, BX
+	SHRQ         $0x08, BX
+	SHLQ         $0x04, BX
+	ADDQ         CX, BX
+	VPSHUFB      (DX), X0, X0
+	VPSHUFB      (BX), X1, X1
 	MOVQ         outBytes_base+24(FP), CX
 	MOVQ         CX, DX
 	MOVQ         lenTable+56(FP), BX
@@ -70,14 +68,12 @@ TEXT ·put8uint32DiffFast(SB), NOSPLIT, $0-74
 	MOVBQZX      AL, DX
 	SHLQ         $0x04, DX
 	ADDQ         CX, DX
-	VLDDQU       (DX), X2
-	MOVWQZX      AX, DX
-	SHRQ         $0x08, DX
-	SHLQ         $0x04, DX
-	ADDQ         CX, DX
-	VLDDQU       (DX), X3
-	VPSHUFB      X2, X0, X0
-	VPSHUFB      X3, X1, X1
+	MOVWQZX      AX, BX
+	SHRQ         $0x08, BX
+	SHLQ         $0x04, BX
+	ADDQ         CX, BX
+	VPSHUFB      (DX), X0, X0
+	VPSHUFB      (BX), X1, X1
 	MOVQ         outBytes_base+24(FP), CX
 	MOVQ         CX, DX
 	MOVQ         lenTable+64(FP), BX

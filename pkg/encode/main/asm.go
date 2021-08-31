@@ -7,6 +7,7 @@ import (
 	. "github.com/mmcloughlin/avo/build"
 	"github.com/mmcloughlin/avo/operand"
 	"github.com/mmcloughlin/avo/reg"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
 const (
@@ -47,7 +48,7 @@ func differential() {
 		log.Fatalf("failed to get addr of prev")
 	}
 
-	firstFour, secondFour := load8(pIn)
+	firstFour, secondFour := shared.Load8(pIn)
 	prev := XMM()
 	VPALIGNR(operand.Imm(12), firstFour, secondFour, prev)
 	VPSUBD(prev, secondFour, secondFour)
@@ -61,7 +62,7 @@ func differential() {
 
 func regular() {
 	TEXT(name, NOSPLIT, signature)
-	coreAlgorithm(load8(pIn))
+	coreAlgorithm(shared.Load8(pIn))
 }
 
 func coreAlgorithm(firstFour, secondFour reg.VecVirtual) {
@@ -85,10 +86,9 @@ func coreAlgorithm(firstFour, secondFour reg.VecVirtual) {
 	Store(ctrl.As16(), Return(pR))
 
 	shuffleBase := Load(Param(pShuffle), GP64())
-	firstShuffle := loadCtrl16Shuffle(shuffleBase, ctrl, false)
-	secondShuffle := loadCtrl16Shuffle(shuffleBase, ctrl, true)
+	firstShuffle := shared.CalculateShuffleAddrFromCtrl(shuffleBase, ctrl, false)
+	secondShuffle := shared.CalculateShuffleAddrFromCtrl(shuffleBase, ctrl, true)
 
-	// TODO(milan): change to use memory operands
 	VPSHUFB(firstShuffle, firstFour, firstFour)
 	VPSHUFB(secondShuffle, secondFour, secondFour)
 
@@ -96,51 +96,13 @@ func coreAlgorithm(firstFour, secondFour reg.VecVirtual) {
 	secondAddr := GP64()
 	MOVQ(firstAddr, secondAddr)
 
-	lenValue := loadLenValue(pLenTable, ctrl)
+	lenAddr, lenValue := shared.LenValueAddr(ctrl, false, pLenTable)
 
-	MOVBQZX(operand.Mem{Base: lenValue}, lenValue)
+	MOVBQZX(lenAddr, lenValue)
 	ADDQ(lenValue, secondAddr)
 
 	VMOVDQU(firstFour, operand.Mem{Base: firstAddr})
 	VMOVDQU(secondFour, operand.Mem{Base: secondAddr})
 
 	RET()
-}
-
-func load8(paramName string) (reg.VecVirtual, reg.VecVirtual) {
-	arrBase := operand.Mem{
-		Base: Load(Param(paramName).Base(), GP64()),
-	}
-	firstFour := XMM()
-	secondFour := XMM()
-	VLDDQU(arrBase, firstFour)
-	VLDDQU(arrBase.Offset(16), secondFour)
-
-	return firstFour, secondFour
-}
-
-func loadCtrl16Shuffle(shuffleBase reg.Register, ctrl reg.GPVirtual, upper bool) reg.VecVirtual {
-	a := GP64()
-	if upper {
-		MOVWQZX(ctrl.As16(), a)
-		SHRQ(operand.Imm(8), a)
-	} else {
-		MOVBQZX(ctrl.As8(), a)
-	}
-
-	// Left shift by 4 to get the byte level offset for the shuffle table
-	SHLQ(operand.Imm(4), a)
-	ADDQ(shuffleBase, a)
-
-	shuffle := XMM()
-	VLDDQU(operand.Mem{Base: a}, shuffle)
-	return shuffle
-}
-
-func loadLenValue(paramName string, ctrl reg.GPVirtual) reg.GPVirtual {
-	lt := Load(Param(paramName), GP64())
-	lenValue := GP64()
-	MOVBQZX(ctrl.As8L(), lenValue)
-	ADDQ(lt, lenValue)
-	return lenValue
 }

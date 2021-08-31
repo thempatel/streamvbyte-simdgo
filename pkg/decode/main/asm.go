@@ -5,7 +5,7 @@ import (
 
 	. "github.com/mmcloughlin/avo/build"
 	"github.com/mmcloughlin/avo/operand"
-	"github.com/mmcloughlin/avo/reg"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
 const (
@@ -31,19 +31,19 @@ func main() {
 	ctrl := GP64()
 	Load(Param(pCtrl), ctrl)
 	shuffleBase := Load(Param(pShuffle), GP64())
-	shuffleA := loadCtrl16Shuffle(shuffleBase, ctrl, false)
-	shuffleB := loadCtrl16Shuffle(shuffleBase, ctrl, true)
+	shuffleA := shared.CalculateShuffleAddrFromCtrl(shuffleBase, ctrl, false)
+	shuffleB := shared.CalculateShuffleAddrFromCtrl(shuffleBase, ctrl, true)
 
 	firstBlock := Load(Param(pIn).Base(), GP64())
 	secondBlock := GP64()
 	MOVQ(firstBlock, secondBlock)
-	lowerSize := loadLenValue(ctrl, false)
+	lowerAddr, lowerSize := shared.LenValueAddr(ctrl, false, pLenTable)
 
-	MOVBQZX(operand.Mem{Base: lowerSize}, lowerSize)
+	MOVBQZX(lowerAddr, lowerSize)
 	ADDQ(lowerSize, secondBlock)
 
-	upperSize := loadLenValue(ctrl, true)
-	MOVBQZX(operand.Mem{Base: upperSize}, upperSize)
+	upperAddr, upperSize := shared.LenValueAddr(ctrl, true, pLenTable)
+	MOVBQZX(upperAddr, upperSize)
 	ADDQ(upperSize, lowerSize)
 	Store(lowerSize, Return(pR))
 
@@ -62,33 +62,4 @@ func main() {
 
 	RET()
 	Generate()
-}
-
-func loadCtrl16Shuffle(shuffleBase reg.Register, ctrl reg.GPVirtual, upper bool) operand.Mem {
-	a := GP64()
-	if upper {
-		MOVWQZX(ctrl.As16(), a)
-		SHRQ(operand.Imm(8), a)
-	} else {
-		MOVBQZX(ctrl.As8(), a)
-	}
-
-	// Left shift by 4 to get the byte level offset for the shuffle table
-	SHLQ(operand.Imm(4), a)
-	ADDQ(shuffleBase, a)
-
-	return operand.Mem{Base: a}
-}
-
-func loadLenValue(ctrl reg.GPVirtual, upper bool) reg.GPVirtual {
-	lt := Load(Param(pLenTable), GP64())
-	lenValue := GP64()
-	if upper {
-		MOVWQZX(ctrl.As16(), lenValue)
-		SHRQ(operand.Imm(8), lenValue)
-	} else {
-		MOVBQZX(ctrl.As8L(), lenValue)
-	}
-	ADDQ(lt, lenValue)
-	return lenValue
 }
