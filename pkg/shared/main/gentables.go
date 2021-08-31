@@ -65,7 +65,7 @@ func newLineAfter(countPerLine int) func(out io.Writer) {
 }
 
 func genPerNumLengthTable(out io.Writer) error {
-	_, _ = fmt.Fprintf(out, "\nvar PerNumLenTable = &[256][4]uint8{\n")
+	_, _ = fmt.Fprintf(out, "\nvar PerNumLenTable *[256][4]uint8 = &[256][4]uint8{\n")
 	tabber := newLineAfter(4)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
@@ -80,7 +80,7 @@ func genPerNumLengthTable(out io.Writer) error {
 }
 
 func genPerQuadLengthTable(out io.Writer) error {
-	_, _ = fmt.Fprintf(out, "\nvar PerControlLenTable = &[256]uint8{\n")
+	_, _ = fmt.Fprintf(out, "\nvar PerControlLenTable *[256]uint8 = &[256]uint8{\n")
 	tabber := newLineAfter(8)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
@@ -100,7 +100,7 @@ const (
 )
 
 func genEncodeShuffleTable(out io.Writer) error {
-	_, _ = fmt.Fprintf(out, "\nvar EncodeShuffleTable = &[256][16]uint8{\n")
+	_, _ = fmt.Fprintf(out, "\nvar EncodeShuffleTable *[256][16]uint8 = &[256][16]uint8{\n")
 	tabber := newLineAfter(1)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
@@ -133,7 +133,7 @@ func genEncodeShuffleTable(out io.Writer) error {
 }
 
 func genDecodeShuffleTable(out io.Writer) error {
-	_, _ = fmt.Fprintf(out, "\nvar DecodeShuffleTable = &[256][16]uint8{\n")
+	_, _ = fmt.Fprintf(out, "\nvar DecodeShuffleTable *[256][16]uint8 = &[256][16]uint8{\n")
 	tabber := newLineAfter(1)
 	for i := 0; i < MaxControlByte; i++ {
 		one, two, three, four := sizes(uint8(i))
