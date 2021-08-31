@@ -1,6 +1,7 @@
 package decode
 
 import (
+	"encoding/binary"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -105,6 +106,25 @@ func BenchmarkGet8uint32Fast(b *testing.B) {
 
 var readSinkB int
 
+func BenchmarkGet8uint32DiffFast(b *testing.B) {
+	count := 8
+	nums := util.GenUint32(count)
+	util.SortUint32(nums)
+	in := make([]byte, count*encode.MaxBytesPerNum)
+	ctrl := encode.Put8uint32DiffScalar(nums, in, 0)
+	out := make([]uint32, count)
+
+	read := 0
+	b.SetBytes(32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		read = get8uint32Diff(in, out, ctrl, 0)
+	}
+	readSinkB = read
+}
+
+var readSinkC int
+
 func BenchmarkGet8uint32Scalar(b *testing.B) {
 	count := 8
 	nums := util.GenUint32(count)
@@ -118,19 +138,60 @@ func BenchmarkGet8uint32Scalar(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		read = Get8uint32Scalar(in, out, ctrl)
 	}
-	readSinkB = read
+	readSinkC = read
 }
 
-var readSinkC int
+var readSinkD int
 
-func BenchmarkGet8uint32Varint(b *testing.B) {
-	data := util.PutVarint(util.GenUint32(8))
+func BenchmarkGet8uint32DiffScalar(b *testing.B) {
+	count := 8
+	nums := util.GenUint32(count)
+	util.SortUint32(nums)
+	in := make([]byte, count*encode.MaxBytesPerNum)
+	ctrl := encode.Put8uint32DiffScalar(nums, in, 0)
+	out := make([]uint32, count)
 
 	read := 0
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		read = util.GetVarint(data)
+		read = Get8uint32DiffScalar(in, out, ctrl, 0)
 	}
-	readSinkC = read
+	readSinkD = read
+}
+
+var readSinkE int
+
+func BenchmarkGet8uint32Varint(b *testing.B) {
+	count := 8
+	data := make([]byte, binary.MaxVarintLen32*count)
+	written := util.PutVarint(util.GenUint32(count), data)
+	data = data[:written]
+	out := make([]uint32, count)
+
+	read := 0
+	b.SetBytes(32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		read = util.GetVarint(data, out)
+	}
+	readSinkE = read
+}
+
+var readSinkF int
+
+func BenchmarkGet8uint32DiffVarint(b *testing.B) {
+	count := 8
+	data := make([]byte, binary.MaxVarintLen32*count)
+	written := util.PutDiffVarint(util.GenUint32(count), data, 0)
+	data = data[:written]
+	out := make([]uint32, count)
+
+	read := 0
+	b.SetBytes(32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		read = util.GetDiffVarint(data, out, 0)
+	}
+	readSinkF = read
 }

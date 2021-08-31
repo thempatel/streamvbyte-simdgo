@@ -180,14 +180,13 @@ var writeSinkE int
 func BenchmarkPut8uint32Varint(b *testing.B) {
 	count := 8
 	nums := util.GenUint32(count)
-
 	out := make([]byte, binary.MaxVarintLen32*count)
 	written := 0
 
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		written = write8Varint(nums, out)
+		written = util.PutVarint(nums, out)
 	}
 	writeSinkE = written
 }
@@ -198,8 +197,6 @@ func BenchmarkPut8uint32DiffVarint(b *testing.B) {
 	count := 8
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
-	diffed := make([]uint32, count)
-	util.Diff(nums, diffed)
 
 	out := make([]byte, binary.MaxVarintLen32*count)
 	written := 0
@@ -207,17 +204,7 @@ func BenchmarkPut8uint32DiffVarint(b *testing.B) {
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		written = write8Varint(diffed, out)
+		written = util.PutDiffVarint(nums, out, 0)
 	}
 	writeSinkF = written
-}
-
-func write8Varint(nums []uint32, out []byte) int {
-	pos := 0
-	for i := range nums {
-		size := binary.PutUvarint(out[pos:], uint64(nums[i]))
-		pos += size
-	}
-
-	return pos
 }
