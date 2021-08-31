@@ -64,7 +64,7 @@ func differential() {
 	VBROADCASTSS(prevSingular.Addr, prev) 		// [P P P P]
 	undoDiff(firstFour, prev)
 
-	VPSHUFD(operand.Imm(0xff), prev, prev)	// [A B C D] -> [D D D D]
+	VPSHUFD(operand.Imm(0xff), firstFour, prev)	// [A B C D] -> [D D D D]
 	undoDiff(secondFour, prev)
 
 	outBase := operand.Mem{Base: Load(Param(pOut).Base(), GP64())}
@@ -76,12 +76,12 @@ func differential() {
 }
 
 func undoDiff(four, prev reg.VecVirtual) {
-	adder := XMM()
-	VPSLLDQ(operand.Imm(4), four, adder) 	// [- A B C]
-	VPADDD(four, prev, prev)					// [PA PB PC PD]
-	VPADDD(adder, prev, prev) 						// [PA PAB PBC PCD]
-	VPSLLDQ(operand.Imm(8), four, adder) 	// [- - A AB]
-	VPADDD(adder, prev, four)					// [PA PAB PABC PABCD]
+	adder := XMM()							// [A B C D]
+	VPSLLDQ(operand.Imm(4), four, adder) // [- A  B  C]
+	VPADDD(four, adder, four)				// [A AB BC CD]
+	VPSLLDQ(operand.Imm(8), four, adder) // [- - A AB]
+	VPADDD(four, prev, four) 				// [PA PAB PBC PCD]
+	VPADDD(four, adder, four)				// [PA PAB PABC PABCD]
 }
 
 func coreAlgorithm() (reg.VecVirtual, reg.VecVirtual) {

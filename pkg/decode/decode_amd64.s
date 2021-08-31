@@ -69,16 +69,16 @@ TEXT ·get8uint32DiffFast(SB), NOSPLIT, $0-80
 	VPSHUFB      (BX), X1, X1
 	VBROADCASTSS prev+52(FP), X2
 	VPSLLDQ      $0x04, X0, X3
-	VPADDD       X0, X2, X2
-	VPADDD       X3, X2, X2
+	VPADDD       X0, X3, X0
 	VPSLLDQ      $0x08, X0, X3
-	VPADDD       X3, X2, X0
-	VPSHUFD      $0xff, X2, X2
+	VPADDD       X0, X2, X0
+	VPADDD       X0, X3, X0
+	VPSHUFD      $0xff, X0, X2
 	VPSLLDQ      $0x04, X1, X3
-	VPADDD       X1, X2, X2
-	VPADDD       X3, X2, X2
+	VPADDD       X1, X3, X1
 	VPSLLDQ      $0x08, X1, X3
-	VPADDD       X3, X2, X1
+	VPADDD       X1, X2, X1
+	VPADDD       X1, X3, X1
 	MOVQ         out_base+24(FP), AX
 	VMOVDQU      X0, (AX)
 	VMOVDQU      X1, 16(AX)
