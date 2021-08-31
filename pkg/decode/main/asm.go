@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	name = "get8uint32Fast"
+	name     = "get8uint32Fast"
 	nameDiff = "get8uint32DiffFast"
 
 	pIn       = "in"
@@ -19,7 +19,7 @@ const (
 	pCtrl     = "ctrl"
 	pShuffle  = "shuffle"
 	pLenTable = "lenTable"
-	pPrev	  = "prev"
+	pPrev     = "prev"
 	pR        = "r"
 )
 
@@ -61,10 +61,10 @@ func differential() {
 	}
 
 	prev := XMM()
-	VBROADCASTSS(prevSingular.Addr, prev) 		// [P P P P]
+	VBROADCASTSS(prevSingular.Addr, prev) // [P P P P]
 	undoDiff(firstFour, prev)
 
-	VPSHUFD(operand.Imm(0xff), firstFour, prev)	// [A B C D] -> [D D D D]
+	VPSHUFD(operand.Imm(0xff), firstFour, prev) // [A B C D] -> [D D D D]
 	undoDiff(secondFour, prev)
 
 	outBase := operand.Mem{Base: Load(Param(pOut).Base(), GP64())}
@@ -76,12 +76,12 @@ func differential() {
 }
 
 func undoDiff(four, prev reg.VecVirtual) {
-	adder := XMM()							// [A B C D]
+	adder := XMM()                       // [A B C D]
 	VPSLLDQ(operand.Imm(4), four, adder) // [- A  B  C]
-	VPADDD(four, adder, four)				// [A AB BC CD]
+	VPADDD(four, adder, four)            // [A AB BC CD]
 	VPSLLDQ(operand.Imm(8), four, adder) // [- - A AB]
-	VPADDD(four, prev, four) 				// [PA PAB PBC PCD]
-	VPADDD(four, adder, four)				// [PA PAB PABC PABCD]
+	VPADDD(four, prev, four)             // [PA PAB PBC PCD]
+	VPADDD(four, adder, four)            // [PA PAB PABC PABCD]
 }
 
 func coreAlgorithm() (reg.VecVirtual, reg.VecVirtual) {
