@@ -1,8 +1,6 @@
 package decode
 
 import (
-	"encoding/binary"
-
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
@@ -51,7 +49,7 @@ func Get8uint32DiffScalar(in []byte, out []uint32, ctrl uint16, prev uint32) int
 }
 
 func Get4uint32DiffScalar(in []byte, out []uint32, ctrl uint8, prev uint32) int {
-	// Drop the bounds checks
+	// bounds check hint to compiler
 	_ = out[3]
 
 	sizes := shared.PerNumLenTable[ctrl]
@@ -69,8 +67,33 @@ func Get4uint32DiffScalar(in []byte, out []uint32, ctrl uint8, prev uint32) int 
 	return int(len0 + len1 + len2 + len3)
 }
 
+var dispatch = [5]func([]byte) uint32 {
+	nil,
+	decode1byte,
+	decode2byte,
+	decode3byte,
+	decode4byte,
+}
+
 func decodeOne(input []byte, size uint8) uint32 {
-	buf := make([]byte, 4)
-	copy(buf, input[:size])
-	return binary.LittleEndian.Uint32(buf)
+	return dispatch[size](input)
+}
+
+func decode1byte(b []byte) uint32 {
+	return uint32(b[0])
+}
+
+func decode2byte(b []byte) uint32 {
+	_ = b[1] // bounds check hint to compiler
+	return uint32(b[0]) | uint32(b[1])<<8
+}
+
+func decode3byte(b []byte) uint32 {
+	_ = b[2] // bounds check hint to compiler
+	return uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16
+}
+
+func decode4byte(b []byte) uint32 {
+	_ = b[3] // bounds check hint to compiler
+	return uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24
 }

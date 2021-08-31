@@ -39,7 +39,7 @@ func Put8uint32Scalar(in []uint32, out []byte) uint16 {
 }
 
 func Put4uint32Scalar(in []uint32, out []byte) uint8 {
-	// Drop the bounds checks
+	// bounds check hint to compiler
 	_ = in[3]
 
 	num0 := in[0]
@@ -65,7 +65,7 @@ func Put8uint32DiffScalar(in []uint32, out []byte, prev uint32) uint16 {
 }
 
 func Put4uint32DiffScalar(in []uint32, out []byte, prev uint32) uint8 {
-	// Drop the bounds checks
+	// bounds check hint to compiler
 	_ = in[3]
 
 	num0 := in[0] - prev
