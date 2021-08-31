@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 BEFORE_DIFF=$(git diff | sha1sum )
 BEFORE_STATUS=$(git status --porcelain | sha1sum)
 
