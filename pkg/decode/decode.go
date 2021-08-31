@@ -1,8 +1,6 @@
 package decode
 
 import (
-	"encoding/binary"
-
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
@@ -51,7 +49,7 @@ func Get8uint32DiffScalar(in []byte, out []uint32, ctrl uint16, prev uint32) int
 }
 
 func Get4uint32DiffScalar(in []byte, out []uint32, ctrl uint8, prev uint32) int {
-	// Drop the bounds checks
+	// bounds check hint to compiler
 	_ = out[3]
 
 	sizes := shared.PerNumLenTable[ctrl]
@@ -70,7 +68,19 @@ func Get4uint32DiffScalar(in []byte, out []uint32, ctrl uint8, prev uint32) int 
 }
 
 func decodeOne(input []byte, size uint8) uint32 {
-	buf := make([]byte, 4)
-	copy(buf, input[:size])
-	return binary.LittleEndian.Uint32(buf)
+	var res uint32
+	switch size {
+	case 4:
+		res |= uint32(input[3])<<24
+		fallthrough
+	case 3:
+		res |= uint32(input[2])<<16
+		fallthrough
+	case 2:
+		res |= uint32(input[1])<<8
+		fallthrough
+	case 1:
+		res |= uint32(input[0])
+	}
+	return res
 }
