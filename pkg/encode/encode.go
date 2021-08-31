@@ -55,6 +55,32 @@ func Put4uint32Scalar(in []uint32, out []byte) uint8 {
 	return uint8((len0 - 1) | (len1-1)<<2 | (len2-1)<<4 | (len3-1)<<6)
 }
 
+func Put8uint32DiffScalar(in []uint32, out []byte, prev uint32) uint16 {
+	var ctrl uint16
+	first := Put4uint32DiffScalar(in, out, prev)
+	ctrl |= uint16(first)
+	encoded := shared.ControlByteToSize(first)
+	second := Put4uint32DiffScalar(in[4:], out[encoded:], in[3])
+	return ctrl | uint16(second)<<8
+}
+
+func Put4uint32DiffScalar(in []uint32, out []byte, prev uint32) uint8 {
+	// Drop the bounds checks
+	_ = in[3]
+
+	num0 := in[0] - prev
+	num1 := in[1] - in[0]
+	num2 := in[2] - in[1]
+	num3 := in[3] - in[2]
+
+	len0 := encodeOne(num0, out)
+	len1 := encodeOne(num1, out[len0:])
+	len2 := encodeOne(num2, out[len0+len1:])
+	len3 := encodeOne(num3, out[len0+len1+len2:])
+
+	return uint8((len0 - 1) | (len1-1)<<2 | (len2-1)<<4 | (len3-1)<<6)
+}
+
 func encodeOne(num uint32, out []byte) int {
 	size := max(1, 4-(bits.LeadingZeros32(num)/8))
 	binary.LittleEndian.PutUint32(out, num)

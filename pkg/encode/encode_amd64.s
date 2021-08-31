@@ -2,33 +2,37 @@
 
 #include "textflag.h"
 
+DATA mask0101<>+0(SB)/2, $0x0101
+GLOBL mask0101<>(SB), RODATA|NOPTR, $2
+
+DATA mask7F00<>+0(SB)/2, $0x7f00
+GLOBL mask7F00<>(SB), RODATA|NOPTR, $2
+
 // func put8uint32Fast(in []uint32, outBytes []byte, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
 // Requires: AVX, AVX2
 TEXT ·put8uint32Fast(SB), NOSPLIT, $0-66
-	VPBROADCASTW mask1111<>+0(SB), X0
-	VPBROADCASTW mask7F00<>+0(SB), X1
 	MOVQ         in_base+0(FP), AX
-	VLDDQU       (AX), X2
-	VLDDQU       16(AX), X3
-	VPMINUB      X0, X2, X4
-	VPMINUB      X0, X3, X5
+	VLDDQU       (AX), X0
+	VLDDQU       16(AX), X1
+	VPBROADCASTW mask0101<>+0(SB), X2
+	VPBROADCASTW mask7F00<>+0(SB), X3
+	VPMINUB      X2, X0, X4
+	VPMINUB      X2, X1, X5
 	VPACKUSWB    X5, X4, X4
-	VPMINSW      X0, X4, X4
-	VPADDUSW     X1, X4, X4
+	VPMINSW      X2, X4, X4
+	VPADDUSW     X3, X4, X4
 	VPMOVMSKB    X4, AX
 	MOVW         AX, r+64(FP)
 	MOVQ         shuffle+48(FP), CX
 	MOVBQZX      AL, DX
 	SHLQ         $0x04, DX
 	ADDQ         CX, DX
-	VLDDQU       (DX), X0
-	MOVWQZX      AX, DX
-	SHRQ         $0x08, DX
-	SHLQ         $0x04, DX
-	ADDQ         CX, DX
-	VLDDQU       (DX), X1
-	VPSHUFB      X0, X2, X2
-	VPSHUFB      X1, X3, X3
+	MOVWQZX      AX, BX
+	SHRQ         $0x08, BX
+	SHLQ         $0x04, BX
+	ADDQ         CX, BX
+	VPSHUFB      (DX), X0, X0
+	VPSHUFB      (BX), X1, X1
 	MOVQ         outBytes_base+24(FP), CX
 	MOVQ         CX, DX
 	MOVQ         lenTable+56(FP), BX
@@ -36,12 +40,47 @@ TEXT ·put8uint32Fast(SB), NOSPLIT, $0-66
 	ADDQ         BX, AX
 	MOVBQZX      (AX), AX
 	ADDQ         AX, DX
-	VMOVDQU      X2, (CX)
-	VMOVDQU      X3, (DX)
+	VMOVDQU      X0, (CX)
+	VMOVDQU      X1, (DX)
 	RET
 
-DATA mask1111<>+0(SB)/2, $0x1111
-GLOBL mask1111<>(SB), RODATA|NOPTR, $2
-
-DATA mask7F00<>+0(SB)/2, $0x7f00
-GLOBL mask7F00<>(SB), RODATA|NOPTR, $2
+// func put8uint32DiffFast(in []uint32, outBytes []byte, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
+// Requires: AVX, AVX2
+TEXT ·put8uint32DiffFast(SB), NOSPLIT, $0-74
+	MOVQ         in_base+0(FP), AX
+	VLDDQU       (AX), X0
+	VLDDQU       16(AX), X1
+	VPALIGNR     $0x0c, X0, X1, X2
+	VPSUBD       X2, X1, X1
+	VBROADCASTSS prev+48(FP), X2
+	VPALIGNR     $0x0c, X2, X0, X2
+	VPSUBD       X2, X0, X0
+	VPBROADCASTW mask0101<>+0(SB), X2
+	VPBROADCASTW mask7F00<>+0(SB), X3
+	VPMINUB      X2, X0, X4
+	VPMINUB      X2, X1, X5
+	VPACKUSWB    X5, X4, X4
+	VPMINSW      X2, X4, X4
+	VPADDUSW     X3, X4, X4
+	VPMOVMSKB    X4, AX
+	MOVW         AX, r+72(FP)
+	MOVQ         shuffle+56(FP), CX
+	MOVBQZX      AL, DX
+	SHLQ         $0x04, DX
+	ADDQ         CX, DX
+	MOVWQZX      AX, BX
+	SHRQ         $0x08, BX
+	SHLQ         $0x04, BX
+	ADDQ         CX, BX
+	VPSHUFB      (DX), X0, X0
+	VPSHUFB      (BX), X1, X1
+	MOVQ         outBytes_base+24(FP), CX
+	MOVQ         CX, DX
+	MOVQ         lenTable+64(FP), BX
+	MOVBQZX      AL, AX
+	ADDQ         BX, AX
+	MOVBQZX      (AX), AX
+	ADDQ         AX, DX
+	VMOVDQU      X0, (CX)
+	VMOVDQU      X1, (DX)
+	RET

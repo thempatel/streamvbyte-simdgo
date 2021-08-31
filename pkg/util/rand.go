@@ -15,7 +15,7 @@ import (
 type generator func() uint32
 
 func randUint32Range(low, high uint32) uint32 {
-	return (rand.Uint32() % (high-low+1))+low
+	return (rand.Uint32() % (high - low + 1)) + low
 }
 
 var (

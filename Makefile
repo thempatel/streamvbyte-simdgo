@@ -1,3 +1,6 @@
 
 generate:
 	go generate ./pkg/...
+
+test:
+	go test -v ./pkg/...

@@ -21,8 +21,22 @@ func put8uint32(in []uint32, out []byte) uint16 {
 	)
 }
 
+func put8uint32Diff(in []uint32, out []byte, prev uint32) uint16 {
+	return put8uint32DiffFast(
+		in, out, prev,
+		shared.EncodeShuffleTable,
+		shared.PerControlLenTable,
+	)
+}
+
 //go:noescape
 func put8uint32Fast(
 	in []uint32, outBytes []byte,
+	shuffle *[256][16]uint8, lenTable *[256]uint8,
+) (r uint16)
+
+//go:noescape
+func put8uint32DiffFast(
+	in []uint32, outBytes []byte, prev uint32,
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
 ) (r uint16)
