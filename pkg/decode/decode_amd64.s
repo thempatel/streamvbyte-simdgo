@@ -36,3 +36,50 @@ TEXT ·get8uint32Fast(SB), NOSPLIT, $0-80
 	VMOVDQU X0, (AX)
 	VMOVDQU X1, 16(AX)
 	RET
+
+// func get8uint32DiffFast(in []byte, out []uint32, ctrl uint16, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint64)
+// Requires: AVX
+TEXT ·get8uint32DiffFast(SB), NOSPLIT, $0-80
+	MOVWQZX      ctrl+48(FP), AX
+	MOVQ         shuffle+56(FP), CX
+	MOVBQZX      AL, DX
+	SHLQ         $0x04, DX
+	ADDQ         CX, DX
+	MOVWQZX      AX, BX
+	SHRQ         $0x08, BX
+	SHLQ         $0x04, BX
+	ADDQ         CX, BX
+	MOVQ         in_base+0(FP), CX
+	MOVQ         CX, SI
+	MOVQ         lenTable+64(FP), DI
+	MOVBQZX      AL, R8
+	ADDQ         DI, R8
+	MOVBQZX      (R8), R8
+	ADDQ         R8, SI
+	MOVQ         lenTable+64(FP), DI
+	MOVWQZX      AX, AX
+	SHRQ         $0x08, AX
+	ADDQ         DI, AX
+	MOVBQZX      (AX), AX
+	ADDQ         AX, R8
+	MOVQ         R8, r+72(FP)
+	VLDDQU       (CX), X0
+	VLDDQU       (SI), X1
+	VPSHUFB      (DX), X0, X0
+	VPSHUFB      (BX), X1, X1
+	VBROADCASTSS prev+52(FP), X2
+	VPSLLDQ      $0x04, X0, X3
+	VPADDD       X0, X2, X2
+	VPADDD       X3, X2, X2
+	VPSLLDQ      $0x08, X0, X3
+	VPADDD       X3, X2, X0
+	VPSHUFD      $0xff, X2, X2
+	VPSLLDQ      $0x04, X1, X3
+	VPADDD       X1, X2, X2
+	VPADDD       X3, X2, X2
+	VPSLLDQ      $0x08, X1, X3
+	VPADDD       X3, X2, X1
+	MOVQ         out_base+24(FP), AX
+	VMOVDQU      X0, (AX)
+	VMOVDQU      X1, 16(AX)
+	RET
