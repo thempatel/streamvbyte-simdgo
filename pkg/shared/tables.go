@@ -2,7 +2,7 @@
 
 package shared
 
-var PerNumLenTable = &[256][4]uint8{
+var PerNumLenTable *[256][4]uint8 = &[256][4]uint8{
 	{1, 1, 1, 1}, 	{2, 1, 1, 1}, 	{3, 1, 1, 1}, 	{4, 1, 1, 1},
 	{1, 2, 1, 1}, 	{2, 2, 1, 1}, 	{3, 2, 1, 1}, 	{4, 2, 1, 1},
 	{1, 3, 1, 1}, 	{2, 3, 1, 1}, 	{3, 3, 1, 1}, 	{4, 3, 1, 1},
@@ -69,7 +69,7 @@ var PerNumLenTable = &[256][4]uint8{
 	{1, 4, 4, 4}, 	{2, 4, 4, 4}, 	{3, 4, 4, 4}, 	{4, 4, 4, 4},
 }
 
-var PerControlLenTable = &[256]uint8{
+var PerControlLenTable *[256]uint8 = &[256]uint8{
 	4, 	5, 	6, 	7, 	5, 	6, 	7, 	8,
 	6, 	7, 	8, 	9, 	7, 	8, 	9, 	10,
 	5, 	6, 	7, 	8, 	6, 	7, 	8, 	9,
@@ -104,7 +104,7 @@ var PerControlLenTable = &[256]uint8{
 	12, 	13, 	14, 	15, 	13, 	14, 	15, 	16,
 }
 
-var EncodeShuffleTable = &[256][16]uint8{
+var EncodeShuffleTable *[256][16]uint8 = &[256][16]uint8{
 	// 0	0x00	00000000	len	1	1	1	1
 	{0x00, 0x04, 0x08, 0x0c, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff},
 	// 1	0x01	00000001	len	2	1	1	1
@@ -619,7 +619,7 @@ var EncodeShuffleTable = &[256][16]uint8{
 	{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f},
 }
 
-var DecodeShuffleTable = &[256][16]uint8{
+var DecodeShuffleTable *[256][16]uint8 = &[256][16]uint8{
 	// 0	0x00	00000000	len	1	1	1	1
 	{0x00, 0xff, 0xff, 0xff, 0x01, 0xff, 0xff, 0xff, 0x02, 0xff, 0xff, 0xff, 0x03, 0xff, 0xff, 0xff},
 	// 1	0x01	00000001	len	2	1	1	1

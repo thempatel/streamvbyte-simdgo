@@ -8,7 +8,7 @@ import (
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/decode"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
-	"github.com/theMPatel/streamvbyte-simdgo/pkg/randutils"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
 
 func init() {
@@ -51,7 +51,7 @@ func BenchmarkCopy(b *testing.B) {
 	count := 8
 	nums := make([]uint32, count)
 	for i := 0; i < count; i++ {
-		nums[i] = randutils.RandUint32()
+		nums[i] = util.RandUint32()
 	}
 
 	dest := make([]uint32, count)
