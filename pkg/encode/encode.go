@@ -36,6 +36,7 @@ func Put8uint32(in []uint32, out []byte) uint16 {
 // Put8uint32Scalar will encode 8 uint32 values from in into out using the
 // Stream VByte format. Returns an 16-bit control value produced from the
 // encoding.
+//
 // Note: It is your responsibility to ensure that the incoming slices have
 // the appropriate sizes and data otherwise this func will panic.
 func Put8uint32Scalar(in []uint32, out []byte) uint16 {
@@ -98,8 +99,8 @@ func Put4uint32Scalar(in []uint32, out []byte) uint8 {
 // is done to ensure that the integers are correctly resolved to the correct diff. An
 // example below. Note that this func assumes that the input integers are already sorted.
 //
-// Original:     [ 10, 20, 30, 40, 50, 60, 70, 80 ] [ 90, 100, 110, 120, 130, 140, 150, 160 ]
-// Differential: [ 10, 10, 10, 10, 10, 10, 10, 10 ] [ 10, 10, 10, 10, 10, 10, 10, 10 ]
+// Input:	[ 10, 20, 30, 40, 50, 60, 70, 80 ] [ 90, 100, 110, 120, 130, 140, 150, 160 ]
+// Output:	[ 10, 10, 10, 10, 10, 10, 10, 10 ] [ 10, 10, 10, 10, 10, 10, 10, 10 ]
 // Prev: 80
 func Put8uint32DiffScalar(in []uint32, out []byte, prev uint32) uint16 {
 	var ctrl uint16
@@ -117,8 +118,8 @@ func Put8uint32DiffScalar(in []uint32, out []byte, prev uint32) uint16 {
 // is done to ensure that the integers are correctly resolved to the correct diff. An
 // example below. Note that this func assumes that the input integers are already sorted.
 //
-// Original:     [ 10, 20, 30, 40 ] [ 50, 60, 70, 80 ]
-// Differential: [ 10, 10, 10, 10 ] [ 10, 10, 10, 10 ]
+// Input:	[ 10, 20, 30, 40 ] [ 50, 60, 70, 80 ]
+// Output:	[ 10, 10, 10, 10 ] [ 10, 10, 10, 10 ]
 // Prev: 40
 func Put4uint32DiffScalar(in []uint32, out []byte, prev uint32) uint8 {
 	// bounds check hint to compiler
