@@ -49,17 +49,17 @@ func get8uint32Fast(
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
 ) (r uint64)
 
-// get8uint32DiffFast follows the same basic logic as get8uint32DiffFast
-// with the exception that prior to writing the uncompressed integers
-// out to the output slice, the original values are reconstructed from
+// get8uint32DiffFast works similarly to get8uint32Fast with the
+// exception that prior to writing the uncompressed integers out
+// to the output slice, the original values are reconstructed from
 // the diffs. The basic reconstruction algorithm is as follows:
 //
-// Input: 			[A B C D]
-// Input Shifted: 	[- A  B  C]
-// Add above two: 	[A AB BC CD]
+// Input:           [A B C D]
+// Input Shifted:   [- A  B  C]
+// Add above two:   [A AB BC CD]
 // Vector Add Prev: [PA PAB PBC PCD]
-// Input Shifted: 	[- - A AB]
-// Add Shifted: 	[PA PAB PABC PABCD]
+// Input Shifted:   [- - A AB]
+// Add Shifted:     [PA PAB PABC PABCD]
 //go:noescape
 func get8uint32DiffFast(
 	in []byte, out []uint32, ctrl uint16, prev uint32,

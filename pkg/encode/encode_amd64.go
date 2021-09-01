@@ -197,7 +197,7 @@ func put8uint32Fast(
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
 ) (r uint16)
 
-// put8uint32DiffFast works similarly to put8uint32Fast above, except
+// put8uint32DiffFast works similarly to put8uint32Fast except
 // that prior to encoding the 8 uint32s, we first use differential
 // coding to change the original numbers into deltas using SIMD
 // techniques. Afterwards, the encoding algorithm follows the same
