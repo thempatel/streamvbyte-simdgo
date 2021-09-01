@@ -93,9 +93,10 @@ func Put4uint32Scalar(in []uint32, out []byte) uint8 {
 
 // Put8uint32DiffScalar will differentially encode 8 uint32 values from in into out.
 // Prev provides a way for you to indicate the base value for this batch of 8.
-// For example, when encoding the second batch of 8, you would provide a prev
-// value of 80, to ensure that the integers are correctly resolved to the correct
-// diff.
+// For example, when encoding the second batch of 8 integers out of, e.g. 16, you would
+// provide a prev value of the last value in the first batch of 8 you encoded. This
+// is done to ensure that the integers are correctly resolved to the correct diff. An
+// example below. Note that this func assumes that the input integers are already sorted.
 //
 // Original:     [ 10, 20, 30, 40, 50, 60, 70, 80 ] [ 90, 100, 110, 120, 130, 140, 150, 160 ]
 // Differential: [ 10, 10, 10, 10, 10, 10, 10, 10 ] [ 10, 10, 10, 10, 10, 10, 10, 10 ]
@@ -109,6 +110,16 @@ func Put8uint32DiffScalar(in []uint32, out []byte, prev uint32) uint16 {
 	return ctrl | uint16(second)<<8
 }
 
+// Put4uint32DiffScalar will differentially encode 4 uint32 values from in into out.
+// Prev provides a way for you to indicate the base value for this batch of 4.
+// For example, when encoding the second batch of 4 integers out of, e.g. 8, you would
+// provide a prev value of the last value in the first batch of 4 you encoded. This
+// is done to ensure that the integers are correctly resolved to the correct diff. An
+// example below. Note that this func assumes that the input integers are already sorted.
+//
+// Original:     [ 10, 20, 30, 40 ] [ 50, 60, 70, 80 ]
+// Differential: [ 10, 10, 10, 10 ] [ 10, 10, 10, 10 ]
+// Prev: 40
 func Put4uint32DiffScalar(in []uint32, out []byte, prev uint32) uint8 {
 	// bounds check hint to compiler
 	_ = in[3]
