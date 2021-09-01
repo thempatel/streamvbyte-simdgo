@@ -67,20 +67,16 @@ func Get4uint32DiffScalar(in []byte, out []uint32, ctrl uint8, prev uint32) int 
 	return int(len0 + len1 + len2 + len3)
 }
 
-func decodeOne(input []byte, size uint8) uint32 {
-	var res uint32
+func decodeOne(b []byte, size uint8) uint32 {
 	switch size {
 	case 4:
-		res |= uint32(input[3])<<24
-		fallthrough
+		return uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16 | uint32(b[3])<<24
 	case 3:
-		res |= uint32(input[2])<<16
-		fallthrough
+		return uint32(b[0]) | uint32(b[1])<<8 | uint32(b[2])<<16
 	case 2:
-		res |= uint32(input[1])<<8
-		fallthrough
+		return uint32(b[0]) | uint32(b[1])<<8
 	case 1:
-		res |= uint32(input[0])
+		return uint32(b[0])
 	}
-	return res
+	panic("impossible")
 }
