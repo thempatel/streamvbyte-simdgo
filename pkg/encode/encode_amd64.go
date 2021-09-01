@@ -201,7 +201,13 @@ func put8uint32Fast(
 // that prior to encoding the 8 uint32s, we first use differential
 // coding to change the original numbers into deltas using SIMD
 // techniques. Afterwards, the encoding algorithm follows the same
-// flow as put8uint32Fast.
+// flow as put8uint32Fast. The basic differential coding algorithm
+// is as follows:
+//
+// Prev:  			[P P P P]
+// Input: 			[A B C D]
+// Concat-shift:	[P A B C]
+// Subtract:		[A-P B-A C-B D-C]
 //go:noescape
 func put8uint32DiffFast(
 	in []uint32, outBytes []byte, prev uint32,
