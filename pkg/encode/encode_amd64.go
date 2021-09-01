@@ -204,8 +204,8 @@ func put8uint32Fast(
 // flow as put8uint32Fast. The basic differential coding algorithm
 // is as follows:
 //
-// Prev:  			[P P P P]
-// Input: 			[A B C D]
+// Prev:			[P P P P]
+// Input:			[A B C D]
 // Concat-shift:	[P A B C]
 // Subtract:		[A-P B-A C-B D-C]
 //go:noescape
