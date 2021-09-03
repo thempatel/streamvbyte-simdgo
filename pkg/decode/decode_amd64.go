@@ -28,10 +28,10 @@ func Get8uint32Fast(in []byte, out []uint32, ctrl uint16) {
 	)
 }
 
-// Get8uint32DiffFast binds to get8uint32DiffFast which is implemented
+// Get8uint32DeltaFast binds to get8uint32DeltaFast which is implemented
 // in assembly.
-func Get8uint32DiffFast(in []byte, out []uint32, ctrl uint16, prev uint32) {
-	get8uint32DiffFast(
+func Get8uint32DeltaFast(in []byte, out []uint32, ctrl uint16, prev uint32) {
+	get8uint32DeltaFast(
 		in, out, ctrl, prev,
 		shared.DecodeShuffleTable,
 		shared.PerControlLenTable,
@@ -49,7 +49,7 @@ func get8uint32Fast(
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
 )
 
-// get8uint32DiffFast works similarly to get8uint32Fast with the
+// get8uint32DeltaFast works similarly to get8uint32Fast with the
 // exception that prior to writing the uncompressed integers out
 // to the output slice, the original values are reconstructed from
 // the diffs. The basic reconstruction algorithm is as follows:
@@ -61,7 +61,7 @@ func get8uint32Fast(
 // Input Shifted:   [- - A AB]
 // Add Shifted:     [PA PAB PABC PABCD]
 //go:noescape
-func get8uint32DiffFast(
+func get8uint32DeltaFast(
 	in []byte, out []uint32, ctrl uint16, prev uint32,
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
 )

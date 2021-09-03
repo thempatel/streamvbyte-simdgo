@@ -1,6 +1,6 @@
 // Package stream provides logic that allows for you to operate on entire streams
 // of uint32's or bytes.
-package stream
+package posting
 
 const (
 	HeaderMagic uint64 = 0x3fd76c17

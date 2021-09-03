@@ -28,10 +28,10 @@ func Put8uint32Fast(in []uint32, out []byte) uint16 {
 	)
 }
 
-// Put8uint32DiffFast binds to put8uint32DiffFast which is implemented
+// Put8uint32DeltaFast binds to put8uint32DeltaFast which is implemented
 // in assembly.
-func Put8uint32DiffFast(in []uint32, out []byte, prev uint32) uint16 {
-	return put8uint32DiffFast(
+func Put8uint32DeltaFast(in []uint32, out []byte, prev uint32) uint16 {
+	return put8uint32DeltaFast(
 		in, out, prev,
 		shared.EncodeShuffleTable,
 		shared.PerControlLenTable,
@@ -197,7 +197,7 @@ func put8uint32Fast(
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
 ) (r uint16)
 
-// put8uint32DiffFast works similarly to put8uint32Fast except
+// put8uint32DeltaFast works similarly to put8uint32Fast except
 // that prior to encoding the 8 uint32s, we first use differential
 // coding to change the original numbers into deltas using SIMD
 // techniques. Afterwards, the encoding algorithm follows the same
@@ -209,7 +209,7 @@ func put8uint32Fast(
 // Concat-shift:    [P A B C]
 // Subtract:        [A-P B-A C-B D-C]
 //go:noescape
-func put8uint32DiffFast(
+func put8uint32DeltaFast(
 	in []uint32, outBytes []byte, prev uint32,
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
 ) (r uint16)

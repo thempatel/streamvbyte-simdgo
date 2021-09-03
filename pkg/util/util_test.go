@@ -25,16 +25,16 @@ func TestVarintRoundTrip(t *testing.T) {
 	}
 }
 
-func TestVarintDiffRoundTrip(t *testing.T) {
+func TestVarintDeltaRoundTrip(t *testing.T) {
 	count := 8
 	nums := GenUint32(count)
 	SortUint32(nums)
 	out := make([]byte, count*binary.MaxVarintLen32)
-	written := PutDiffVarint(nums, out, 0)
+	written := PutDeltaVarint(nums, out, 0)
 	out = out[:written]
 
 	actual := make([]uint32, count)
-	read := GetDiffVarint(out, actual, 0)
+	read := GetDeltaVarint(out, actual, 0)
 
 	if written != read {
 		t.Fatalf("expected to read %d, got %d", written, read)

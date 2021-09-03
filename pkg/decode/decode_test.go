@@ -28,15 +28,15 @@ func TestGet8uint32Scalar(t *testing.T) {
 	}
 }
 
-func TestGet8uint32DiffScalar(t *testing.T) {
+func TestGet8uint32DeltaScalar(t *testing.T) {
 	count := 8
 	expected := util.GenUint32(count)
 	util.SortUint32(expected)
 	in := make([]byte, count*encode.MaxBytesPerNum)
-	ctrl := encode.Put8uint32DiffScalar(expected, in, 0)
+	ctrl := encode.Put8uint32DeltaScalar(expected, in, 0)
 	out := make([]uint32, 8)
 
-	Get8uint32DiffScalar(in, out, ctrl, 0)
+	Get8uint32DeltaScalar(in, out, ctrl, 0)
 	if !reflect.DeepEqual(expected, out) {
 		t.Fatalf("expected %+v, got %+v", expected, out)
 	}
@@ -55,15 +55,15 @@ func TestGet8uint32Fast(t *testing.T) {
 	}
 }
 
-func TestGet8uint32DiffFast(t *testing.T) {
+func TestGet8uint32DeltaFast(t *testing.T) {
 	count := 8
 	expected := util.GenUint32(count)
 	util.SortUint32(expected)
 	in := make([]byte, count*encode.MaxBytesPerNum)
-	ctrl := encode.Put8uint32DiffScalar(expected, in, 0)
+	ctrl := encode.Put8uint32DeltaScalar(expected, in, 0)
 	out := make([]uint32, 8)
 
-	Get8uint32DiffFast(in, out, ctrl, 0)
+	Get8uint32DeltaFast(in, out, ctrl, 0)
 	if !reflect.DeepEqual(expected, out) {
 		t.Fatalf("expected %+v, got %+v", expected, out)
 	}
@@ -88,18 +88,18 @@ func BenchmarkGet8uint32Fast(b *testing.B) {
 
 var readSinkB []uint32
 
-func BenchmarkGet8uint32DiffFast(b *testing.B) {
+func BenchmarkGet8uint32DeltaFast(b *testing.B) {
 	count := 8
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
 	in := make([]byte, count*encode.MaxBytesPerNum)
-	ctrl := encode.Put8uint32DiffScalar(nums, in, 0)
+	ctrl := encode.Put8uint32DeltaScalar(nums, in, 0)
 	out := make([]uint32, count)
 
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Get8uint32DiffFast(in, out, ctrl, 0)
+		Get8uint32DeltaFast(in, out, ctrl, 0)
 	}
 	readSinkB = out
 }
@@ -123,18 +123,18 @@ func BenchmarkGet8uint32Scalar(b *testing.B) {
 
 var readSinkD []uint32
 
-func BenchmarkGet8uint32DiffScalar(b *testing.B) {
+func BenchmarkGet8uint32DeltaScalar(b *testing.B) {
 	count := 8
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
 	in := make([]byte, count*encode.MaxBytesPerNum)
-	ctrl := encode.Put8uint32DiffScalar(nums, in, 0)
+	ctrl := encode.Put8uint32DeltaScalar(nums, in, 0)
 	out := make([]uint32, count)
 
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Get8uint32DiffScalar(in, out, ctrl, 0)
+		Get8uint32DeltaScalar(in, out, ctrl, 0)
 	}
 	readSinkD = out
 }
@@ -158,17 +158,17 @@ func BenchmarkGet8uint32Varint(b *testing.B) {
 
 var readSinkF []uint32
 
-func BenchmarkGet8uint32DiffVarint(b *testing.B) {
+func BenchmarkGet8uint32DeltaVarint(b *testing.B) {
 	count := 8
 	data := make([]byte, binary.MaxVarintLen32*count)
-	written := util.PutDiffVarint(util.GenUint32(count), data, 0)
+	written := util.PutDeltaVarint(util.GenUint32(count), data, 0)
 	data = data[:written]
 	out := make([]uint32, count)
 
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		util.GetDiffVarint(data, out, 0)
+		util.GetDeltaVarint(data, out, 0)
 	}
 	readSinkF = out
 }

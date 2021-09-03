@@ -44,9 +44,9 @@ TEXT ·put8uint32Fast(SB), NOSPLIT, $0-66
 	VMOVDQU      X1, (DX)
 	RET
 
-// func put8uint32DiffFast(in []uint32, outBytes []byte, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
+// func put8uint32DeltaFast(in []uint32, outBytes []byte, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
 // Requires: AVX, AVX2
-TEXT ·put8uint32DiffFast(SB), NOSPLIT, $0-74
+TEXT ·put8uint32DeltaFast(SB), NOSPLIT, $0-74
 	MOVQ         in_base+0(FP), AX
 	VLDDQU       (AX), X0
 	VLDDQU       16(AX), X1

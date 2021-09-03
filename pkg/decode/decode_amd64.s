@@ -30,9 +30,9 @@ TEXT ·get8uint32Fast(SB), NOSPLIT, $0-72
 	VMOVDQU X1, 16(AX)
 	RET
 
-// func get8uint32DiffFast(in []byte, out []uint32, ctrl uint16, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8)
+// func get8uint32DeltaFast(in []byte, out []uint32, ctrl uint16, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8)
 // Requires: AVX
-TEXT ·get8uint32DiffFast(SB), NOSPLIT, $0-72
+TEXT ·get8uint32DeltaFast(SB), NOSPLIT, $0-72
 	MOVWQZX      ctrl+48(FP), AX
 	MOVQ         shuffle+56(FP), CX
 	MOVBQZX      AL, DX
