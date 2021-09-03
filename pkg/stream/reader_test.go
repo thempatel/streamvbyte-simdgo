@@ -50,3 +50,20 @@ func TestFastReadAll(t *testing.T) {
 		t.Fatalf("decoded wrong nums")
 	}
 }
+
+var readSinkA []uint32
+
+func BenchmarkFastReadAll(b *testing.B) {
+	count := 100_000
+	nums := util.GenUint32(count)
+	stream := encodeNums(nums)
+
+	b.SetBytes(int64(count*encode.MaxBytesPerNum))
+	b.ResetTimer()
+	var read []uint32
+	for i := 0; i < b.N; i++ {
+		read = FastReadAll(count, stream)
+	}
+
+	readSinkA = read
+}
