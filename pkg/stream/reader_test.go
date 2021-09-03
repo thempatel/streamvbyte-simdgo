@@ -1,6 +1,8 @@
 package stream
 
 import (
+	"fmt"
+	"math"
 	"reflect"
 	"testing"
 
@@ -26,10 +28,14 @@ func encodeNums(nums []uint32) []byte {
 
 	if lowest4 != count {
 		rest := make([]uint32, 4)
+		buf := make([]byte, encode.MaxBytesPerNum*4)
 		copy(rest, nums[numsPos:])
 
-		ctrl := encode.Put4uint32Scalar(rest, data[dataPos:])
-		dataPos += shared.ControlByteToSize(ctrl)-(count-lowest4)
+		ctrl := encode.Put4uint32Scalar(rest, buf)
+		size := shared.ControlByteToSize(ctrl)
+		size -= 4 - (count - lowest4)
+		copy(data[dataPos:], buf[:size])
+		dataPos += size
 		ctrlData = append(ctrlData, ctrl)
 
 	}
@@ -41,29 +47,36 @@ func encodeNums(nums []uint32) []byte {
 }
 
 func TestFastReadAll(t *testing.T) {
-	count := 100
-	nums := util.GenUint32(count)
-	stream := encodeNums(nums)
-	readNums := FastReadAll(count, stream)
-
-	if !reflect.DeepEqual(nums, readNums) {
-		t.Fatalf("decoded wrong nums")
+	for i := 0; i < 6; i++ {
+		count := int(math.Pow10(i))
+		nums := util.GenUint32(count)
+		stream := encodeNums(nums)
+		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
+			readNums := FastReadAll(count, stream)
+			if !reflect.DeepEqual(nums, readNums) {
+				t.Fatalf("decoded wrong nums")
+			}
+		})
 	}
 }
 
 var readSinkA []uint32
 
 func BenchmarkFastReadAll(b *testing.B) {
-	count := 100_000
-	nums := util.GenUint32(count)
-	stream := encodeNums(nums)
+	for i := 0; i < 8; i++ {
+		count := int(math.Pow10(i))
+		nums := util.GenUint32(count)
+		stream := encodeNums(nums)
 
-	b.SetBytes(int64(count*encode.MaxBytesPerNum))
-	b.ResetTimer()
-	var read []uint32
-	for i := 0; i < b.N; i++ {
-		read = FastReadAll(count, stream)
+		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
+			b.SetBytes(int64(count*encode.MaxBytesPerNum))
+			b.ResetTimer()
+			b.ReportAllocs()
+			var read []uint32
+			for i := 0; i < b.N; i++ {
+				read = FastReadAll(count, stream)
+			}
+			readSinkA = read
+		})
 	}
-
-	readSinkA = read
 }

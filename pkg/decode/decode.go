@@ -74,6 +74,32 @@ func Get4uint32Scalar(in []byte, out []uint32, ctrl uint8) {
 	out[3] = decodeOne(in[len0+len1+len2:], len3)
 }
 
+// GetUint32Scalar decodes up to 4 integers from in into out using the
+// Stream VByte format.
+//
+// Note: It is your responsibility to ensure that the incoming slices have
+// the appropriate sizes and data otherwise this func will panic.
+func GetUint32Scalar(in []byte, out []uint32, ctrl uint8, count int) int {
+	if count == 0 {
+		return 0
+	}
+
+	if count > 4 {
+		count = 4
+	}
+
+	shift := 0
+	total := 0
+	for i := 0; i < count; i++ {
+		size := ((ctrl>>shift)&0x3)+1
+		out[i] = decodeOne(in[total:], size)
+		total += int(size)
+		shift += 2
+	}
+
+	return total
+}
+
 // Get8uint32DeltaScalar will decode 8 uint32 values from in into out and reconstruct
 // the original values via differential coding. Prev provides a way for you to
 // indicate the base value for this batch of 8. For example, when decoding the second

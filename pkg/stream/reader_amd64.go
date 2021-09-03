@@ -4,7 +4,6 @@ package stream
 
 import (
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/decode"
-	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
@@ -63,15 +62,17 @@ func FastReadAll(count int, stream []byte) []uint32 {
 		decoded += 8
 	}
 
-	buf := make([]byte, 24*encode.MaxBytesPerNum)
-	copy(buf, stream[dataPos:])
-
-	ctrl := uint16(stream[ctrlPos]) | uint16(stream[ctrlPos+1]) << 8
-	decode.Get8uint32Fast(stream[dataPos:], out[decoded:], ctrl)
-	dataPos += shared.ControlByteToSizeTwo(ctrl)
-	decoded += 8
-
-	decode.Get8uint32Fast(stream[dataPos:], out[decoded:], uint16(stream[ctrlPos+2]))
+	for ; ctrlPos < ctrlLen; ctrlPos += 1 {
+		nums := count-decoded
+		if nums > 4 {
+			nums = 4
+		}
+		dataPos += decode.GetUint32Scalar(
+			stream[dataPos:], out[decoded:],
+			stream[ctrlPos], nums,
+		)
+		decoded += nums
+	}
 
 	return out[:count]
 }
