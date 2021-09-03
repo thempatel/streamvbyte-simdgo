@@ -21,21 +21,21 @@ func GetMode() shared.PerformanceMode {
 
 // get8uint32 binds to get8uint32Fast which is implemented in
 // assembly.
-func get8uint32(in []byte, out []uint32, ctrl uint16) int {
-	return int(get8uint32Fast(in, out, ctrl,
+func get8uint32(in []byte, out []uint32, ctrl uint16) {
+	get8uint32Fast(in, out, ctrl,
 		shared.DecodeShuffleTable,
 		shared.PerControlLenTable,
-	))
+	)
 }
 
 // get8uint32Diff binds to get8uint32DiffFast which is implemented
 // in assembly.
-func get8uint32Diff(in []byte, out []uint32, ctrl uint16, prev uint32) int {
-	return int(get8uint32DiffFast(
+func get8uint32Diff(in []byte, out []uint32, ctrl uint16, prev uint32) {
+	get8uint32DiffFast(
 		in, out, ctrl, prev,
 		shared.DecodeShuffleTable,
 		shared.PerControlLenTable,
-	))
+	)
 }
 
 // get8uint32Fast uses the provided 16-bit control to load the
@@ -47,7 +47,7 @@ func get8uint32Diff(in []byte, out []uint32, ctrl uint16, prev uint32) int {
 func get8uint32Fast(
 	in []byte, out []uint32, ctrl uint16,
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
-) (r uint64)
+)
 
 // get8uint32DiffFast works similarly to get8uint32Fast with the
 // exception that prior to writing the uncompressed integers out
@@ -57,11 +57,11 @@ func get8uint32Fast(
 // Input:           [A B C D]
 // Input Shifted:   [- A  B  C]
 // Add above two:   [A AB BC CD]
-// Vector Add Prev: [PA PAB PBC PCD]
+// Add Prev:        [PA PAB PBC PCD]
 // Input Shifted:   [- - A AB]
 // Add Shifted:     [PA PAB PABC PABCD]
 //go:noescape
 func get8uint32DiffFast(
 	in []byte, out []uint32, ctrl uint16, prev uint32,
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
-) (r uint64)
+)

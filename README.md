@@ -23,31 +23,31 @@ goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkCopy-12    	467161464	         2.570 ns/op	12453.40 MB/s
+BenchmarkMemCopy8Uint32-12    	458334021	         2.595 ns/op	12331.11 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkGet8uint32Fast-12          	330213674	         3.614 ns/op	8855.45 MB/s
-BenchmarkGet8uint32DiffFast-12      	274969924	         4.370 ns/op	7322.62 MB/s
-BenchmarkGet8uint32Scalar-12        	53956873	        19.89 ns/op	1608.71 MB/s
-BenchmarkGet8uint32DiffScalar-12    	52124692	        23.00 ns/op	1391.40 MB/s
-BenchmarkGet8uint32Varint-12        	25916104	        44.01 ns/op	 727.12 MB/s
-BenchmarkGet8uint32DiffVarint-12    	22726515	        58.82 ns/op	 544.03 MB/s
+BenchmarkGet8uint32Fast-12          	377293542	         3.172 ns/op	10088.24 MB/s
+BenchmarkGet8uint32DiffFast-12      	311777208	         3.849 ns/op	8314.22 MB/s
+BenchmarkGet8uint32Scalar-12        	62649510	        18.77 ns/op	1705.09 MB/s
+BenchmarkGet8uint32DiffScalar-12    	62117378	        19.87 ns/op	1610.56 MB/s
+BenchmarkGet8uint32Varint-12        	24252985	        43.71 ns/op	 732.06 MB/s
+BenchmarkGet8uint32DiffVarint-12    	19931002	        56.28 ns/op	 568.55 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkPut8uint32Fast-12          	313462341	         3.835 ns/op	8343.99 MB/s
-BenchmarkPut8uint32DiffFast-12      	271562272	         4.286 ns/op	7466.90 MB/s
-BenchmarkPut8uint32Scalar-12        	41348114	        28.92 ns/op	1106.53 MB/s
-BenchmarkPut8uint32DiffScalar-12    	38365390	        29.55 ns/op	1082.91 MB/s
-BenchmarkPut8uint32Varint-12        	59726191	        21.28 ns/op	1504.05 MB/s
-BenchmarkPut8uint32DiffVarint-12    	55234234	        20.33 ns/op	1574.04 MB/s
+BenchmarkPut8uint32Fast-12          	308306707	         3.885 ns/op	8235.85 MB/s
+BenchmarkPut8uint32DiffFast-12      	272969456	         4.328 ns/op	7394.11 MB/s
+BenchmarkPut8uint32Scalar-12        	40876120	        31.16 ns/op	1026.91 MB/s
+BenchmarkPut8uint32DiffScalar-12    	40930875	        31.37 ns/op	1019.96 MB/s
+BenchmarkPut8uint32Varint-12        	59179750	        23.62 ns/op	1355.04 MB/s
+BenchmarkPut8uint32DiffVarint-12    	63054574	        24.88 ns/op	1286.25 MB/s
 ```
 
 A note on the benchmarks: An array of random uint32's is generated and then encoded/decoded over

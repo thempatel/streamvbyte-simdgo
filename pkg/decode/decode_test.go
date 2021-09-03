@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
-	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
 
@@ -23,11 +22,7 @@ func TestGet8uint32Scalar(t *testing.T) {
 	ctrl := encode.Put8uint32Scalar(expected, in)
 	out := make([]uint32, 8)
 
-	read := Get8uint32Scalar(in, out, ctrl)
-	if read != shared.ControlByteToSizeTwo(ctrl) {
-		t.Fatalf("expected 13, got %d", read)
-	}
-
+	Get8uint32Scalar(in, out, ctrl)
 	if !reflect.DeepEqual(expected, out) {
 		t.Fatalf("expected %+v, got %+v", expected, out)
 	}
@@ -41,11 +36,7 @@ func TestGet8uint32DiffScalar(t *testing.T) {
 	ctrl := encode.Put8uint32DiffScalar(expected, in, 0)
 	out := make([]uint32, 8)
 
-	read := Get8uint32DiffScalar(in, out, ctrl, 0)
-	if read != shared.ControlByteToSizeTwo(ctrl) {
-		t.Fatalf("expected 13, got %d", read)
-	}
-
+	Get8uint32DiffScalar(in, out, ctrl, 0)
 	if !reflect.DeepEqual(expected, out) {
 		t.Fatalf("expected %+v, got %+v", expected, out)
 	}
@@ -58,11 +49,7 @@ func TestGet8uint32Fast(t *testing.T) {
 	ctrl := encode.Put8uint32Scalar(expected, in)
 	out := make([]uint32, 8)
 
-	read := get8uint32(in, out, ctrl)
-	if read != shared.ControlByteToSizeTwo(ctrl) {
-		t.Fatalf("expected 13, got %d", read)
-	}
-
+	get8uint32(in, out, ctrl)
 	if !reflect.DeepEqual(expected, out) {
 		t.Fatalf("expected %+v, got %+v", expected, out)
 	}
@@ -76,17 +63,13 @@ func TestGet8uint32DiffFast(t *testing.T) {
 	ctrl := encode.Put8uint32DiffScalar(expected, in, 0)
 	out := make([]uint32, 8)
 
-	read := get8uint32Diff(in, out, ctrl, 0)
-	if read != shared.ControlByteToSizeTwo(ctrl) {
-		t.Fatalf("expected 13, got %d", read)
-	}
-
+	get8uint32Diff(in, out, ctrl, 0)
 	if !reflect.DeepEqual(expected, out) {
 		t.Fatalf("expected %+v, got %+v", expected, out)
 	}
 }
 
-var readSinkA int
+var readSinkA []uint32
 
 func BenchmarkGet8uint32Fast(b *testing.B) {
 	count := 8
@@ -95,16 +78,15 @@ func BenchmarkGet8uint32Fast(b *testing.B) {
 	ctrl := encode.Put8uint32Scalar(nums, in)
 	out := make([]uint32, count)
 
-	read := 0
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		read = get8uint32(in, out, ctrl)
+		get8uint32(in, out, ctrl)
 	}
-	readSinkA = read
+	readSinkA = out
 }
 
-var readSinkB int
+var readSinkB []uint32
 
 func BenchmarkGet8uint32DiffFast(b *testing.B) {
 	count := 8
@@ -114,16 +96,15 @@ func BenchmarkGet8uint32DiffFast(b *testing.B) {
 	ctrl := encode.Put8uint32DiffScalar(nums, in, 0)
 	out := make([]uint32, count)
 
-	read := 0
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		read = get8uint32Diff(in, out, ctrl, 0)
+		get8uint32Diff(in, out, ctrl, 0)
 	}
-	readSinkB = read
+	readSinkB = out
 }
 
-var readSinkC int
+var readSinkC []uint32
 
 func BenchmarkGet8uint32Scalar(b *testing.B) {
 	count := 8
@@ -132,16 +113,15 @@ func BenchmarkGet8uint32Scalar(b *testing.B) {
 	ctrl := encode.Put8uint32Scalar(nums, in)
 	out := make([]uint32, count)
 
-	read := 0
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		read = Get8uint32Scalar(in, out, ctrl)
+		Get8uint32Scalar(in, out, ctrl)
 	}
-	readSinkC = read
+	readSinkC = out
 }
 
-var readSinkD int
+var readSinkD []uint32
 
 func BenchmarkGet8uint32DiffScalar(b *testing.B) {
 	count := 8
@@ -151,16 +131,15 @@ func BenchmarkGet8uint32DiffScalar(b *testing.B) {
 	ctrl := encode.Put8uint32DiffScalar(nums, in, 0)
 	out := make([]uint32, count)
 
-	read := 0
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		read = Get8uint32DiffScalar(in, out, ctrl, 0)
+		Get8uint32DiffScalar(in, out, ctrl, 0)
 	}
-	readSinkD = read
+	readSinkD = out
 }
 
-var readSinkE int
+var readSinkE []uint32
 
 func BenchmarkGet8uint32Varint(b *testing.B) {
 	count := 8
@@ -169,16 +148,15 @@ func BenchmarkGet8uint32Varint(b *testing.B) {
 	data = data[:written]
 	out := make([]uint32, count)
 
-	read := 0
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		read = util.GetVarint(data, out)
+		util.GetVarint(data, out)
 	}
-	readSinkE = read
+	readSinkE = out
 }
 
-var readSinkF int
+var readSinkF []uint32
 
 func BenchmarkGet8uint32DiffVarint(b *testing.B) {
 	count := 8
@@ -187,11 +165,10 @@ func BenchmarkGet8uint32DiffVarint(b *testing.B) {
 	data = data[:written]
 	out := make([]uint32, count)
 
-	read := 0
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		read = util.GetDiffVarint(data, out, 0)
+		util.GetDiffVarint(data, out, 0)
 	}
-	readSinkF = read
+	readSinkF = out
 }

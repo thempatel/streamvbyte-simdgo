@@ -20,17 +20,16 @@ const (
 	pShuffle  = "shuffle"
 	pLenTable = "lenTable"
 	pPrev     = "prev"
-	pR        = "r"
 )
 
 var (
 	signature = fmt.Sprintf(
-		"func(%s []byte, %s []uint32, %s uint16, %s *[256][16]uint8, %s *[256]uint8) (%s uint64)",
-		pIn, pOut, pCtrl, pShuffle, pLenTable, pR)
+		"func(%s []byte, %s []uint32, %s uint16, %s *[256][16]uint8, %s *[256]uint8)",
+		pIn, pOut, pCtrl, pShuffle, pLenTable)
 
 	signatureDiff = fmt.Sprintf(
-		"func(%s []byte, %s []uint32, %s uint16, %s uint32, %s *[256][16]uint8, %s *[256]uint8) (%s uint64)",
-		pIn, pOut, pCtrl, pPrev, pShuffle, pLenTable, pR)
+		"func(%s []byte, %s []uint32, %s uint16, %s uint32, %s *[256][16]uint8, %s *[256]uint8)",
+		pIn, pOut, pCtrl, pPrev, pShuffle, pLenTable)
 )
 
 func main() {
@@ -99,11 +98,6 @@ func coreAlgorithm() (reg.VecVirtual, reg.VecVirtual) {
 
 	MOVBQZX(lowerAddr, lowerSize)
 	ADDQ(lowerSize, secondBlock)
-
-	upperAddr, upperSize := shared.LenValueAddr(ctrl, true, pLenTable)
-	MOVBQZX(upperAddr, upperSize)
-	ADDQ(upperSize, lowerSize)
-	Store(lowerSize, Return(pR))
 
 	firstFour := XMM()
 	secondFour := XMM()
