@@ -49,7 +49,7 @@ func TestGet8uint32Fast(t *testing.T) {
 	ctrl := encode.Put8uint32Scalar(expected, in)
 	out := make([]uint32, 8)
 
-	get8uint32(in, out, ctrl)
+	Get8uint32Fast(in, out, ctrl)
 	if !reflect.DeepEqual(expected, out) {
 		t.Fatalf("expected %+v, got %+v", expected, out)
 	}
@@ -63,7 +63,7 @@ func TestGet8uint32DiffFast(t *testing.T) {
 	ctrl := encode.Put8uint32DiffScalar(expected, in, 0)
 	out := make([]uint32, 8)
 
-	get8uint32Diff(in, out, ctrl, 0)
+	Get8uint32DiffFast(in, out, ctrl, 0)
 	if !reflect.DeepEqual(expected, out) {
 		t.Fatalf("expected %+v, got %+v", expected, out)
 	}
@@ -81,7 +81,7 @@ func BenchmarkGet8uint32Fast(b *testing.B) {
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		get8uint32(in, out, ctrl)
+		Get8uint32Fast(in, out, ctrl)
 	}
 	readSinkA = out
 }
@@ -99,7 +99,7 @@ func BenchmarkGet8uint32DiffFast(b *testing.B) {
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		get8uint32Diff(in, out, ctrl, 0)
+		Get8uint32DiffFast(in, out, ctrl, 0)
 	}
 	readSinkB = out
 }

@@ -6,15 +6,19 @@ import (
 
 var (
 	getImpl Get8Impl
+	getDiffImpl Get8DiffImpl
 )
 
 type Get8Impl func(in []byte, out []uint32, ctrl uint16)
+type Get8DiffImpl func(in []byte, out []uint32, ctrl uint16, prev uint32)
 
 func init() {
 	if GetMode() == shared.Fast {
-		getImpl = get8uint32
+		getImpl = Get8uint32Fast
+		getDiffImpl = Get8uint32DiffFast
 	} else {
 		getImpl = Get8uint32Scalar
+		getDiffImpl = Get8uint32DiffScalar
 	}
 }
 
@@ -25,6 +29,15 @@ func init() {
 // scalar implementation will be used as the fallback.
 func Get8uint32(in []byte, out []uint32, ctrl uint16) {
 	getImpl(in, out, ctrl)
+}
+
+// Get8uint32Diff is a general func you can use to decode 8 differentially coded
+// uint32's at a time. It will use the fastest implementation available determined
+// during package initialization. If your CPU supports special hardware instructions
+// then it will use an accelerated version of Stream VByte. Otherwise, the
+// scalar implementation will be used as the fallback.
+func Get8uint32Diff(in []byte, out []uint32, ctrl uint16, prev uint32) {
+	getDiffImpl(in, out, ctrl, prev)
 }
 
 // Get8uint32Scalar will decode 8 uint32 values from in into out using the

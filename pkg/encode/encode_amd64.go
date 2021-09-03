@@ -19,18 +19,18 @@ func GetMode() shared.PerformanceMode {
 	return shared.Normal
 }
 
-// put8uint32 binds to put8uint32Fast which is implemented
+// Put8uint32Fast binds to put8uint32Fast which is implemented
 // in assembly.
-func put8uint32(in []uint32, out []byte) uint16 {
+func Put8uint32Fast(in []uint32, out []byte) uint16 {
 	return put8uint32Fast(in, out,
 		shared.EncodeShuffleTable,
 		shared.PerControlLenTable,
 	)
 }
 
-// put8uint32Diff binds to put8uint32DiffFast which is implemented
+// Put8uint32DiffFast binds to put8uint32DiffFast which is implemented
 // in assembly.
-func put8uint32Diff(in []uint32, out []byte, prev uint32) uint16 {
+func Put8uint32DiffFast(in []uint32, out []byte, prev uint32) uint16 {
 	return put8uint32DiffFast(
 		in, out, prev,
 		shared.EncodeShuffleTable,

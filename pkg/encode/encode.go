@@ -12,15 +12,19 @@ const (
 
 var (
 	putImpl Put8Impl
+	putDiffImpl Put8DiffImpl
 )
 
-type Put8Impl func([]uint32, []byte) uint16
+type Put8Impl func(in []uint32, out []byte) (ctrl uint16)
+type Put8DiffImpl func(in []uint32, out []byte, prev uint32) (ctrl uint16)
 
 func init() {
 	if GetMode() == shared.Fast {
-		putImpl = put8uint32
+		putImpl = Put8uint32Fast
+		putDiffImpl = Put8uint32DiffFast
 	} else {
 		putImpl = Put8uint32Scalar
+		putDiffImpl = Put8uint32DiffScalar
 	}
 }
 
@@ -31,6 +35,15 @@ func init() {
 // scalar implementation will be used as the fallback.
 func Put8uint32(in []uint32, out []byte) uint16 {
 	return putImpl(in, out)
+}
+
+// Put8uint32Diff is a general func you can use to encode 8 differentially coded
+// uint32's with at a time. It will use the fastest implementation available
+// determined during package initialization. If your CPU supports special hardware
+// instructions then it will use an accelerated version of Stream VByte. Otherwise,
+// the scalar implementation will be used as the fallback.
+func Put8uint32Diff(in []uint32, out []byte, prev uint32) uint16 {
+	return putDiffImpl(in, out, prev)
 }
 
 // Put8uint32Scalar will encode 8 uint32 values from in into out using the

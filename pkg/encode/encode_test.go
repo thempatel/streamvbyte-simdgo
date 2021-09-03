@@ -71,7 +71,7 @@ func TestPut8uint32Fast(t *testing.T) {
 	out = out[:shared.ControlByteToSizeTwo(scalarCtrl)]
 
 	fastOut := make([]byte, MaxBytesPerNum*count)
-	fastCtrl := put8uint32(nums, fastOut)
+	fastCtrl := Put8uint32Fast(nums, fastOut)
 	fastOut = fastOut[:shared.ControlByteToSizeTwo(fastCtrl)]
 
 	if scalarCtrl != fastCtrl {
@@ -97,7 +97,7 @@ func TestPut8uint32DiffFast(t *testing.T) {
 	expectedData = expectedData[:shared.ControlByteToSizeTwo(scalarCtrl)]
 
 	fastOut := make([]byte, MaxBytesPerNum*count)
-	fastCtrl := put8uint32Diff(nums, fastOut, 0)
+	fastCtrl := Put8uint32DiffFast(nums, fastOut, 0)
 	fastOut = fastOut[:shared.ControlByteToSizeTwo(fastCtrl)]
 
 	if scalarCtrl != fastCtrl {
@@ -120,7 +120,7 @@ func BenchmarkPut8uint32Fast(b *testing.B) {
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ctrl = put8uint32(nums, out)
+		ctrl = Put8uint32Fast(nums, out)
 	}
 	writeSinkA = ctrl
 }
@@ -137,7 +137,7 @@ func BenchmarkPut8uint32DiffFast(b *testing.B) {
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ctrl = put8uint32Diff(nums, out, 0)
+		ctrl = Put8uint32DiffFast(nums, out, 0)
 	}
 	writeSinkB = ctrl
 }
