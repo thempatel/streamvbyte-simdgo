@@ -112,7 +112,7 @@ func TestPut8uint32DeltaFast(t *testing.T) {
 var writeSinkA uint16
 
 func BenchmarkPut8uint32Fast(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)
 
@@ -128,7 +128,7 @@ func BenchmarkPut8uint32Fast(b *testing.B) {
 var writeSinkB uint16
 
 func BenchmarkPut8uint32DeltaFast(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
@@ -145,7 +145,7 @@ func BenchmarkPut8uint32DeltaFast(b *testing.B) {
 var writeSinkC uint16
 
 func BenchmarkPut8uint32Scalar(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)
 
@@ -161,7 +161,7 @@ func BenchmarkPut8uint32Scalar(b *testing.B) {
 var writeSinkD uint16
 
 func BenchmarkPut8uint32DeltaScalar(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
@@ -178,7 +178,7 @@ func BenchmarkPut8uint32DeltaScalar(b *testing.B) {
 var writeSinkE int
 
 func BenchmarkPut8uint32Varint(b *testing.B) {
-	count := 9
+	count := 8
 	out := make([]byte, count*binary.MaxVarintLen32)
 	nums := util.GenUint32(count)
 	written := 0
@@ -194,7 +194,7 @@ func BenchmarkPut8uint32Varint(b *testing.B) {
 var writeSinkF int
 
 func BenchmarkPut8uint32DeltaVarint(b *testing.B) {
-	count := 9
+	count := 8
 	out := make([]byte, count*binary.MaxVarintLen32)
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)

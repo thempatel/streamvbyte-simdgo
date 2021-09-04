@@ -23,46 +23,46 @@ goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkMemCopy8Uint32-12    	408602937	         2.884 ns/op	16643.90 MB/s
+BenchmarkMemCopy8Uint32-12    	454513622	         2.638 ns/op	12131.39 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkGet8uint32Fast-12           	319442628	         3.213 ns/op	14940.14 MB/s
-BenchmarkGet8uint32DeltaFast-12      	277802023	         3.967 ns/op	12099.05 MB/s
-BenchmarkGet8uint32Scalar-12         	64910358	        18.05 ns/op	2659.31 MB/s
-BenchmarkGet8uint32DeltaScalar-12    	66404236	        19.96 ns/op	2405.15 MB/s
-BenchmarkGet8uint32Varint-12         	16023456	        72.68 ns/op	 660.43 MB/s
-BenchmarkGet8uint32DeltaVarint-12    	15212895	        79.61 ns/op	 602.95 MB/s
+BenchmarkGet8uint32Fast-12           	371073579	         3.288 ns/op	9733.21 MB/s
+BenchmarkGet8uint32DeltaFast-12      	271209032	         3.956 ns/op	8089.41 MB/s
+BenchmarkGet8uint32Scalar-12         	66257731	        18.18 ns/op	1759.87 MB/s
+BenchmarkGet8uint32DeltaScalar-12    	63676509	        19.95 ns/op	1604.07 MB/s
+BenchmarkGet8uint32Varint-12         	29397861	        53.20 ns/op	 601.54 MB/s
+BenchmarkGet8uint32DeltaVarint-12    	19212626	        57.58 ns/op	 555.80 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkPut8uint32Fast-12           	305771996	         3.965 ns/op	12106.77 MB/s
-BenchmarkPut8uint32DeltaFast-12      	273782556	         4.549 ns/op	10552.04 MB/s
-BenchmarkPut8uint32Scalar-12         	40556821	        30.03 ns/op	1598.62 MB/s
-BenchmarkPut8uint32DeltaScalar-12    	41220799	        29.02 ns/op	1654.05 MB/s
-BenchmarkPut8uint32Varint-12         	48747967	        24.81 ns/op	1450.93 MB/s
-BenchmarkPut8uint32DeltaVarint-12    	63210768	        23.15 ns/op	1555.14 MB/s
+BenchmarkPut8uint32Fast-12           	307422474	         3.947 ns/op	8107.78 MB/s
+BenchmarkPut8uint32DeltaFast-12      	270938538	         4.425 ns/op	7231.07 MB/s
+BenchmarkPut8uint32Scalar-12         	40985353	        30.78 ns/op	1039.49 MB/s
+BenchmarkPut8uint32DeltaScalar-12    	38999947	        29.65 ns/op	1079.09 MB/s
+BenchmarkPut8uint32Varint-12         	49887454	        24.43 ns/op	1473.80 MB/s
+BenchmarkPut8uint32DeltaVarint-12    	57157407	        25.28 ns/op	1424.14 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/stream
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkReadAllFast/Count:_1-12         	98799039	        12.47 ns/op	 320.84 MB/s
-BenchmarkReadAllFast/Count:_10-12        	27606966	        43.50 ns/op	 919.57 MB/s
-BenchmarkReadAllFast/Count:_100-12       	11113171	       107.7 ns/op	3713.55 MB/s
-BenchmarkReadAllFast/Count:_1000-12      	 1643064	       734.9 ns/op	5443.11 MB/s
-BenchmarkReadAllFast/Count:_10000-12     	  172999	      7048 ns/op	5674.98 MB/s
-BenchmarkReadAllFast/Count:_100000-12    	   16858	     71397 ns/op	5602.48 MB/s
-BenchmarkReadAllFast/Count:_1000000-12   	    1618	    718362 ns/op	5568.22 MB/s
-BenchmarkReadAllFast/Count:_10000000-12  	     148	   7774903 ns/op	5144.76 MB/s
-BenchmarkFastRead-12                     	  415412	      2874 ns/op	5699.81 MB/s
+BenchmarkReadAllFast/Count:_1-12         	99501464	        12.25 ns/op	 326.46 MB/s
+BenchmarkReadAllFast/Count:_10-12        	27362854	        43.45 ns/op	 920.65 MB/s
+BenchmarkReadAllFast/Count:_100-12       	11275953	       106.4 ns/op	3758.33 MB/s
+BenchmarkReadAllFast/Count:_1000-12      	 1638801	       730.5 ns/op	5475.75 MB/s
+BenchmarkReadAllFast/Count:_10000-12     	  170538	      6982 ns/op	5728.64 MB/s
+BenchmarkReadAllFast/Count:_100000-12    	   16780	     71375 ns/op	5604.19 MB/s
+BenchmarkReadAllFast/Count:_1000000-12   	    1599	    716042 ns/op	5586.26 MB/s
+BenchmarkReadAllFast/Count:_10000000-12  	     151	   7783533 ns/op	5139.05 MB/s
+BenchmarkFastRead-12                     	  419320	      2866 ns/op	5716.17 MB/s
 ```
 
 A note on the benchmarks: An array of random uint32's is generated and then encoded/decoded over

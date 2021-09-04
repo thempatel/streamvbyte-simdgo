@@ -7,7 +7,7 @@ import (
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
-func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
+func ReadAllFast(count int, stream []byte, out []uint32) {
 	var (
 		ctrlPos = 0
 		decoded = 0
@@ -107,6 +107,4 @@ func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
 		)
 		decoded += nums
 	}
-
-	return out[:count]
 }

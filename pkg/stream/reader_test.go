@@ -59,8 +59,8 @@ func TestReadAllFast(t *testing.T) {
 		stream := encodeNums(nums)
 		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
 			out := make([]uint32, count)
-			readNums := ReadAllFast(count, stream, out)
-			if !reflect.DeepEqual(nums, readNums) {
+			ReadAllFast(count, stream, out)
+			if !reflect.DeepEqual(nums, out) {
 				t.Fatalf("decoded wrong nums")
 			}
 		})
@@ -78,11 +78,10 @@ func BenchmarkReadAllFast(b *testing.B) {
 		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
-			var read []uint32
 			for i := 0; i < b.N; i++ {
-				read = ReadAllFast(count, stream, out)
+				ReadAllFast(count, stream, out)
 			}
-			readSinkA = read
+			readSinkA = out
 		})
 	}
 }
@@ -97,9 +96,8 @@ func BenchmarkFastRead(b *testing.B) {
 	out := make([]uint32, count)
 	b.SetBytes(int64(per))
 	b.ResetTimer()
-	var read []uint32
 	for i := 0; i < b.N; i++ {
-		read = ReadAllFast(count, stream, out)
+		ReadAllFast(count, stream, out)
 	}
-	readSinkB = read
+	readSinkB = out
 }

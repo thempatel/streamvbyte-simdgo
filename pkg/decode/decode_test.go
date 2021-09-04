@@ -72,9 +72,8 @@ func TestGet8uint32DeltaFast(t *testing.T) {
 var readSinkA []uint32
 
 func BenchmarkGet8uint32Fast(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]uint32, count)
-	_ = out[9]
 
 	nums := util.GenUint32(count)
 	in := make([]byte, count*encode.MaxBytesPerNum)
@@ -91,7 +90,7 @@ func BenchmarkGet8uint32Fast(b *testing.B) {
 var readSinkB []uint32
 
 func BenchmarkGet8uint32DeltaFast(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]uint32, count)
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
@@ -109,7 +108,7 @@ func BenchmarkGet8uint32DeltaFast(b *testing.B) {
 var readSinkC []uint32
 
 func BenchmarkGet8uint32Scalar(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]uint32, count)
 	nums := util.GenUint32(count)
 	in := make([]byte, count*encode.MaxBytesPerNum)
@@ -126,7 +125,7 @@ func BenchmarkGet8uint32Scalar(b *testing.B) {
 var readSinkD []uint32
 
 func BenchmarkGet8uint32DeltaScalar(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]uint32, count)
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
@@ -144,7 +143,7 @@ func BenchmarkGet8uint32DeltaScalar(b *testing.B) {
 var readSinkE []uint32
 
 func BenchmarkGet8uint32Varint(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]uint32, count)
 	data := make([]byte, binary.MaxVarintLen32*count)
 	written := util.PutVarint(util.GenUint32(count), data)
@@ -161,7 +160,7 @@ func BenchmarkGet8uint32Varint(b *testing.B) {
 var readSinkF []uint32
 
 func BenchmarkGet8uint32DeltaVarint(b *testing.B) {
-	count := 12
+	count := 8
 	out := make([]uint32, count)
 	data := make([]byte, binary.MaxVarintLen32*count)
 	written := util.PutDeltaVarint(util.GenUint32(count), data, 0)
