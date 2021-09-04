@@ -80,3 +80,22 @@ func BenchmarkFastRead(b *testing.B) {
 	}
 	readSinkB = out
 }
+
+var readSinkC []uint32
+
+func BenchmarkReadAllScalar(b *testing.B) {
+	for i := 0; i < 8; i++ {
+		count := int(math.Pow10(i))
+		nums := util.GenUint32(count)
+		stream := WriteAllScalar(nums)
+		out := make([]uint32, count)
+		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
+			b.SetBytes(int64(count*encode.MaxBytesPerNum))
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				ReadAllScalar(count, stream, out)
+			}
+			readSinkC = out
+		})
+	}
+}
