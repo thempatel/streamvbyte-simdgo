@@ -117,7 +117,7 @@ func BenchmarkPut8uint32Fast(b *testing.B) {
 	nums := util.GenUint32(count)
 
 	var ctrl uint16
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ctrl = Put8uint32Fast(nums, out[i%len(out)])
@@ -134,7 +134,7 @@ func BenchmarkPut8uint32DeltaFast(b *testing.B) {
 	util.SortUint32(nums)
 
 	var ctrl uint16
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ctrl = Put8uint32DeltaFast(nums, out[i%len(out)], 0)
@@ -150,7 +150,7 @@ func BenchmarkPut8uint32Scalar(b *testing.B) {
 	nums := util.GenUint32(count)
 
 	var ctrl uint16
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ctrl = Put8uint32Scalar(nums, out[i%len(out)])
@@ -167,7 +167,7 @@ func BenchmarkPut8uint32DeltaScalar(b *testing.B) {
 	util.SortUint32(nums)
 
 	var ctrl uint16
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ctrl = Put8uint32DeltaScalar(nums, out[i%len(out)], 0)
@@ -183,7 +183,7 @@ func BenchmarkPut8uint32Varint(b *testing.B) {
 	nums := util.GenUint32(count)
 	written := 0
 
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		written = util.PutVarint(nums, out[i%len(out)])
@@ -200,7 +200,7 @@ func BenchmarkPut8uint32DeltaVarint(b *testing.B) {
 	util.SortUint32(nums)
 	written := 0
 
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		written = util.PutDeltaVarint(nums, out[i%len(out)], 0)

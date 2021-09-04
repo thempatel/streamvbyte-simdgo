@@ -3,13 +3,19 @@ package stream
 import (
 	"fmt"
 	"math"
+	"math/rand"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func encodeNums(nums []uint32) []byte {
 	count := len(nums)
@@ -46,14 +52,14 @@ func encodeNums(nums []uint32) []byte {
 	return final
 }
 
-func TestFastReadAll(t *testing.T) {
+func TestReadAllFast(t *testing.T) {
 	for i := 0; i < 6; i++ {
-		count := int(math.Pow10(i))
+		count := int(util.RandUint32()%1e6)
 		nums := util.GenUint32(count)
 		stream := encodeNums(nums)
 		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
-			out := AllocSlice(count)
-			readNums := FastReadAll(count, stream, out)
+			out := make([]uint32, count)
+			readNums := ReadAllFast(count, stream, out)
 			if !reflect.DeepEqual(nums, readNums) {
 				t.Fatalf("decoded wrong nums")
 			}
@@ -63,19 +69,18 @@ func TestFastReadAll(t *testing.T) {
 
 var readSinkA []uint32
 
-func BenchmarkFastReadAll(b *testing.B) {
+func BenchmarkReadAllFast(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
 		stream := encodeNums(nums)
-		out := AllocSlice(count)
+		out := make([]uint32, count)
 		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
-			b.ReportAllocs()
 			var read []uint32
 			for i := 0; i < b.N; i++ {
-				read = FastReadAll(count, stream, out)
+				read = ReadAllFast(count, stream, out)
 			}
 			readSinkA = read
 		})
@@ -89,12 +94,12 @@ func BenchmarkFastRead(b *testing.B) {
 	nums := util.GenUint32(count)
 	stream := encodeNums(nums)
 	per := count*encode.MaxBytesPerNum
-	out := AllocSlice(count)
+	out := make([]uint32, count)
 	b.SetBytes(int64(per))
 	b.ResetTimer()
 	var read []uint32
 	for i := 0; i < b.N; i++ {
-		read = FastReadAll(count, stream, out)
+		read = ReadAllFast(count, stream, out)
 	}
 	readSinkB = read
 }

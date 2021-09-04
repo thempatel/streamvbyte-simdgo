@@ -3,17 +3,11 @@
 package stream
 
 import (
-	_ "unsafe"
-
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/decode"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
-func AllocSlice(count int) []uint32 {
-	return make([]uint32, (count + 7) & (-8))
-}
-
-func FastReadAll(count int, stream []byte, out []uint32) []uint32 {
+func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
 	var (
 		ctrlPos = 0
 		decoded = 0
@@ -75,7 +69,9 @@ func FastReadAll(count int, stream []byte, out []uint32) []uint32 {
 		ctrlPos += 8
 	}
 
-	for ; ctrlPos < ctrlLen-3; ctrlPos += 2 {
+	// Must be strictly less than the last 4 blocks of integers, since we can't safely
+	// decode 8 if our ctrl pos starts at the first 4 in the block.
+	for ; ctrlPos < ctrlLen-4; ctrlPos += 2 {
 		ctrl := uint16(stream[ctrlPos]) | uint16(stream[ctrlPos+1]) << 8
 		decode.Get8uint32FastAsm(
 			stream[dataPos:], out[decoded:], ctrl,
