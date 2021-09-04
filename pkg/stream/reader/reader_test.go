@@ -55,7 +55,7 @@ func BenchmarkReadAllFast(b *testing.B) {
 		nums := util.GenUint32(count)
 		stream := writer.WriteAllScalar(nums)
 		out := make([]uint32, count)
-		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
+		b.Run(fmt.Sprintf("Count_1e%d", i), func(b *testing.B) {
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
@@ -90,7 +90,7 @@ func BenchmarkReadAllScalar(b *testing.B) {
 		nums := util.GenUint32(count)
 		stream := writer.WriteAllScalar(nums)
 		out := make([]uint32, count)
-		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
+		b.Run(fmt.Sprintf("Count_1e%d", i), func(b *testing.B) {
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {

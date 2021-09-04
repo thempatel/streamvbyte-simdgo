@@ -52,7 +52,7 @@ func BenchmarkWriteAllFast(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
-		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
+		b.Run(fmt.Sprintf("Count_1e%d", i), func(b *testing.B) {
 			var stream []byte
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
@@ -86,7 +86,7 @@ func BenchmarkWriteAllScalar(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
-		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
+		b.Run(fmt.Sprintf("Count_1e%d", i), func(b *testing.B) {
 			var stream []byte
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()

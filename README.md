@@ -23,77 +23,77 @@ goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkMemCopy8Uint32-12    	455012947	         2.686 ns/op	11911.44 MB/s
+BenchmarkMemCopy8Uint32-12    	448033621	         2.613 ns/op	12247.79 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkGet8uint32Fast-12           	373917049	         3.270 ns/op	9786.01 MB/s
-BenchmarkGet8uint32DeltaFast-12      	302560959	         4.028 ns/op	7943.70 MB/s
-BenchmarkGet8uint32Scalar-12         	66383433	        17.97 ns/op	1781.20 MB/s
-BenchmarkGet8uint32DeltaScalar-12    	63747897	        18.21 ns/op	1756.96 MB/s
-BenchmarkGet8uint32Varint-12         	26679096	        50.37 ns/op	 635.26 MB/s
-BenchmarkGet8uint32DeltaVarint-12    	21061335	        53.94 ns/op	 593.20 MB/s
+BenchmarkGet8uint32Fast-12           	368871128	         3.234 ns/op	9895.19 MB/s
+BenchmarkGet8uint32DeltaFast-12      	306617568	         3.853 ns/op	8304.19 MB/s
+BenchmarkGet8uint32Scalar-12         	67530424	        18.59 ns/op	1721.51 MB/s
+BenchmarkGet8uint32DeltaScalar-12    	65821027	        19.17 ns/op	1668.90 MB/s
+BenchmarkGet8uint32Varint-12         	26296116	        46.45 ns/op	 688.88 MB/s
+BenchmarkGet8uint32DeltaVarint-12    	21070124	        57.95 ns/op	 552.16 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkPut8uint32Fast-12           	306290095	         3.960 ns/op	8080.60 MB/s
-BenchmarkPut8uint32DeltaFast-12      	274433187	         4.446 ns/op	7197.80 MB/s
-BenchmarkPut8uint32Scalar-12         	41935557	        30.29 ns/op	1056.52 MB/s
-BenchmarkPut8uint32DeltaScalar-12    	38511097	        31.85 ns/op	1004.65 MB/s
-BenchmarkPut8uint32Varint-12         	54379350	        23.38 ns/op	1368.98 MB/s
-BenchmarkPut8uint32DeltaVarint-12    	60884721	        19.94 ns/op	1604.79 MB/s
+BenchmarkPut8uint32Fast-12           	310744244	         3.883 ns/op	8241.67 MB/s
+BenchmarkPut8uint32DeltaFast-12      	276355396	         4.305 ns/op	7434.07 MB/s
+BenchmarkPut8uint32Scalar-12         	41064336	        29.89 ns/op	1070.47 MB/s
+BenchmarkPut8uint32DeltaScalar-12    	40731841	        29.17 ns/op	1096.87 MB/s
+BenchmarkPut8uint32Varint-12         	48454465	        22.42 ns/op	1427.45 MB/s
+BenchmarkPut8uint32DeltaVarint-12    	68148270	        22.23 ns/op	1439.20 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/stream/reader
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkReadAllFast/Count:_1-12         	99843394	        11.82 ns/op	 338.51 MB/s
-BenchmarkReadAllFast/Count:_10-12        	27126201	        42.60 ns/op	 939.01 MB/s
-BenchmarkReadAllFast/Count:_100-12       	11160085	       107.6 ns/op	3718.00 MB/s
-BenchmarkReadAllFast/Count:_1000-12      	 1658932	       722.9 ns/op	5533.47 MB/s
-BenchmarkReadAllFast/Count:_10000-12     	  174272	      6984 ns/op	5727.52 MB/s
-BenchmarkReadAllFast/Count:_100000-12    	   16840	     70349 ns/op	5685.90 MB/s
-BenchmarkReadAllFast/Count:_1000000-12   	    1597	    720816 ns/op	5549.27 MB/s
-BenchmarkReadAllFast/Count:_10000000-12  	     153	   7716547 ns/op	5183.67 MB/s
-BenchmarkFastRead-12                     	  411036	      2887 ns/op	5675.67 MB/s
-BenchmarkReadAllScalar/Count:_1-12       	130513644	         9.205 ns/op	 434.53 MB/s
-BenchmarkReadAllScalar/Count:_10-12      	39314558	        30.92 ns/op	1293.79 MB/s
-BenchmarkReadAllScalar/Count:_100-12     	 4700821	       254.1 ns/op	1573.93 MB/s
-BenchmarkReadAllScalar/Count:_1000-12    	  481141	      2516 ns/op	1589.54 MB/s
-BenchmarkReadAllScalar/Count:_10000-12   	   17628	     68188 ns/op	 586.61 MB/s
-BenchmarkReadAllScalar/Count:_100000-12  	    1540	    778291 ns/op	 513.95 MB/s
-BenchmarkReadAllScalar/Count:_1000000-12 	     153	   7800029 ns/op	 512.82 MB/s
-BenchmarkReadAllScalar/Count:_10000000-12         	      14	  78333151 ns/op	 510.64 MB/s
+BenchmarkReadAllFast/Count_1e0-12         	100000000	        11.64 ns/op	 343.50 MB/s
+BenchmarkReadAllFast/Count_1e1-12         	27834266	        43.15 ns/op	 927.09 MB/s
+BenchmarkReadAllFast/Count_1e2-12         	11309079	       106.0 ns/op	3773.54 MB/s
+BenchmarkReadAllFast/Count_1e3-12         	 1673222	       720.6 ns/op	5550.61 MB/s
+BenchmarkReadAllFast/Count_1e4-12         	  171164	      6941 ns/op	5763.09 MB/s
+BenchmarkReadAllFast/Count_1e5-12         	   17080	     70616 ns/op	5664.44 MB/s
+BenchmarkReadAllFast/Count_1e6-12         	    1640	    709504 ns/op	5637.74 MB/s
+BenchmarkReadAllFast/Count_1e7-12         	     154	   7670283 ns/op	5214.93 MB/s
+BenchmarkFastRead-12                      	  421057	      2885 ns/op	5678.46 MB/s
+BenchmarkReadAllScalar/Count_1e0-12       	128565745	         9.355 ns/op	 427.59 MB/s
+BenchmarkReadAllScalar/Count_1e1-12       	37689912	        32.12 ns/op	1245.18 MB/s
+BenchmarkReadAllScalar/Count_1e2-12       	 4740482	       252.9 ns/op	1581.38 MB/s
+BenchmarkReadAllScalar/Count_1e3-12       	  482290	      2492 ns/op	1605.11 MB/s
+BenchmarkReadAllScalar/Count_1e4-12       	   17554	     68111 ns/op	 587.28 MB/s
+BenchmarkReadAllScalar/Count_1e5-12       	    1534	    776822 ns/op	 514.92 MB/s
+BenchmarkReadAllScalar/Count_1e6-12       	     153	   7792223 ns/op	 513.33 MB/s
+BenchmarkReadAllScalar/Count_1e7-12       	      14	  78339118 ns/op	 510.60 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/stream/writer
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkWriteAllFast/Count:_1-12         	54035500	        22.28 ns/op	 179.50 MB/s
-BenchmarkWriteAllFast/Count:_10-12        	27856591	        42.14 ns/op	 949.16 MB/s
-BenchmarkWriteAllFast/Count:_100-12       	 7235343	       165.3 ns/op	2419.59 MB/s
-BenchmarkWriteAllFast/Count:_1000-12      	  989134	      1228 ns/op	3256.46 MB/s
-BenchmarkWriteAllFast/Count:_10000-12     	  101655	     11615 ns/op	3443.77 MB/s
-BenchmarkWriteAllFast/Count:_100000-12    	   10000	    110652 ns/op	3614.94 MB/s
-BenchmarkWriteAllFast/Count:_1000000-12   	     928	   1211587 ns/op	3301.45 MB/s
-BenchmarkWriteAllFast/Count:_10000000-12  	     104	  10057733 ns/op	3977.04 MB/s
-BenchmarkFastWrite-12                     	  246242	      4786 ns/op	3423.60 MB/s
-BenchmarkWriteAllScalar/Count:_1-12       	57303043	        21.12 ns/op	 189.41 MB/s
-BenchmarkWriteAllScalar/Count:_10-12      	19084470	        62.15 ns/op	 643.62 MB/s
-BenchmarkWriteAllScalar/Count:_100-12     	 2759889	       439.4 ns/op	 910.35 MB/s
-BenchmarkWriteAllScalar/Count:_1000-12    	  285151	      4210 ns/op	 950.19 MB/s
-BenchmarkWriteAllScalar/Count:_10000-12   	   10000	    100583 ns/op	 397.68 MB/s
-BenchmarkWriteAllScalar/Count:_100000-12  	    1142	   1046886 ns/op	 382.09 MB/s
-BenchmarkWriteAllScalar/Count:_1000000-12 	     100	  10514884 ns/op	 380.41 MB/s
-BenchmarkWriteAllScalar/Count:_10000000-12         	      10	 105130478 ns/op	 380.48 MB/s
+BenchmarkWriteAllFast/Count_1e0-12         	54667987	        21.98 ns/op	 181.97 MB/s
+BenchmarkWriteAllFast/Count_1e1-12         	28875541	        41.76 ns/op	 957.95 MB/s
+BenchmarkWriteAllFast/Count_1e2-12         	 7327003	       161.7 ns/op	2473.45 MB/s
+BenchmarkWriteAllFast/Count_1e3-12         	  992776	      1229 ns/op	3255.02 MB/s
+BenchmarkWriteAllFast/Count_1e4-12         	   98493	     11569 ns/op	3457.37 MB/s
+BenchmarkWriteAllFast/Count_1e5-12         	   10000	    108539 ns/op	3685.30 MB/s
+BenchmarkWriteAllFast/Count_1e6-12         	     915	   1197473 ns/op	3340.37 MB/s
+BenchmarkWriteAllFast/Count_1e7-12         	     106	  10155791 ns/op	3938.64 MB/s
+BenchmarkFastWrite-12                      	  247346	      4677 ns/op	3503.21 MB/s
+BenchmarkWriteAllScalar/Count_1e0-12       	57365708	        21.07 ns/op	 189.83 MB/s
+BenchmarkWriteAllScalar/Count_1e1-12       	18698986	        63.59 ns/op	 629.05 MB/s
+BenchmarkWriteAllScalar/Count_1e2-12       	 2709844	       440.5 ns/op	 908.03 MB/s
+BenchmarkWriteAllScalar/Count_1e3-12       	  286054	      4162 ns/op	 960.98 MB/s
+BenchmarkWriteAllScalar/Count_1e4-12       	   12038	     99717 ns/op	 401.14 MB/s
+BenchmarkWriteAllScalar/Count_1e5-12       	    1141	   1049287 ns/op	 381.21 MB/s
+BenchmarkWriteAllScalar/Count_1e6-12       	     100	  10509348 ns/op	 380.61 MB/s
+BenchmarkWriteAllScalar/Count_1e7-12       	      10	 105091277 ns/op	 380.62 MB/s
 ```
 
 A note on the benchmarks: An array of random uint32's is generated and then encoded/decoded over
