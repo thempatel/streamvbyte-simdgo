@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/stream/reader"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
 
@@ -23,7 +24,7 @@ func TestWriteAllScalar(t *testing.T) {
 		stream := WriteAllScalar(nums)
 		t.Run(fmt.Sprintf("WriteAll: %d", count), func(t *testing.T) {
 			out := make([]uint32, count)
-			WriteAllScalar(count, stream, out)
+			reader.ReadAllScalar(count, stream, out)
 			if !reflect.DeepEqual(nums, out) {
 				t.Fatalf("decoded wrong nums")
 			}
@@ -37,65 +38,62 @@ func TestWriteAllFast(t *testing.T) {
 		nums := util.GenUint32(count)
 		stream := WriteAllScalar(nums)
 		t.Run(fmt.Sprintf("WriteAll: %d", count), func(t *testing.T) {
-			out := make([]uint32, count)
-			WriteAllFast(count, stream, out)
-			if !reflect.DeepEqual(nums, out) {
-				t.Fatalf("decoded wrong nums")
+			actual := WriteAllFast(nums)
+			if !reflect.DeepEqual(stream, actual) {
+				t.Fatalf("bad encoding")
 			}
 		})
 	}
 }
 
-var readSinkA []uint32
+var readSinkA []byte
 
 func BenchmarkWriteAllFast(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
-		stream := WriteAllScalar(nums)
-		out := make([]uint32, count)
 		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
+			var stream []byte
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				WriteAllFast(count, stream, out)
+				stream = WriteAllFast(nums)
 			}
-			readSinkA = out
+			readSinkA = stream
 		})
 	}
 }
 
-var readSinkB []uint32
+var readSinkB []byte
 
-func BenchmarkFastRead(b *testing.B) {
+func BenchmarkFastWrite(b *testing.B) {
 	count := 4096
 	nums := util.GenUint32(count)
-	stream := WriteAllScalar(nums)
 	per := count*encode.MaxBytesPerNum
-	out := make([]uint32, count)
+	var stream []byte
+
 	b.SetBytes(int64(per))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		WriteAllFast(count, stream, out)
+		stream = WriteAllFast(nums)
 	}
-	readSinkB = out
+	readSinkB = stream
 }
 
-var readSinkC []uint32
+var readSinkC []byte
 
 func BenchmarkWriteAllScalar(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
-		stream := WriteAllScalar(nums)
-		out := make([]uint32, count)
 		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
+			var stream []byte
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				WriteAllScalar(count, stream, out)
+				stream = WriteAllScalar(nums)
 			}
-			readSinkC = out
+			readSinkC = stream
 		})
 	}
 }

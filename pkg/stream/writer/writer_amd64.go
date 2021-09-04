@@ -72,7 +72,7 @@ func WriteAllFast(in []uint32) []byte {
 		dataPos += sizeA + sizeB + sizeC + sizeD
 	}
 
-	for ; ctrlPos < ctrlLen-1; ctrlPos += 2 {
+	for ; ctrlPos < ctrlLen-2; ctrlPos += 2 {
 		ctrl := encode.Put8uint32FastAsm(
 			in[encoded:],
 			stream[dataPos:],
@@ -91,10 +91,10 @@ func WriteAllFast(in []uint32) []byte {
 		if nums > 4 {
 			nums = 4
 		}
-
 		ctrl := encode.PutUint32Scalar(in[encoded:], stream[dataPos:], nums)
 		size := shared.ControlByteToSize(ctrl)
-		size -= 4 - (count - encoded)
+		stream[ctrlPos] = ctrl
+		size -= 4 - nums
 		dataPos += size
 		encoded += nums
 	}

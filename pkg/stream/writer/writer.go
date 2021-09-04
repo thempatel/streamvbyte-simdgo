@@ -26,9 +26,10 @@ func WriteAllScalar(in []uint32) []byte {
 	}
 
 	if lowest4 != count {
-		ctrl := encode.PutUint32Scalar(in[numsPos:], stream[dataPos:], count-lowest4)
+		nums := count-lowest4
+		ctrl := encode.PutUint32Scalar(in[numsPos:], stream[dataPos:], nums)
 		size := shared.ControlByteToSize(ctrl)
-		size -= 4 - (count - lowest4)
+		size -= 4 - nums
 		dataPos += size
 		stream[ctrlPos] = ctrl
 	}

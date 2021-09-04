@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/stream/writer"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
 
@@ -20,7 +21,7 @@ func TestReadAllScalar(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		count := int(util.RandUint32()%1e6)
 		nums := util.GenUint32(count)
-		stream := WriteAllScalar(nums)
+		stream := writer.WriteAllScalar(nums)
 		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
 			out := make([]uint32, count)
 			ReadAllScalar(count, stream, out)
@@ -35,7 +36,7 @@ func TestReadAllFast(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		count := int(util.RandUint32()%1e6)
 		nums := util.GenUint32(count)
-		stream := WriteAllScalar(nums)
+		stream := writer.WriteAllScalar(nums)
 		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
 			out := make([]uint32, count)
 			ReadAllFast(count, stream, out)
@@ -52,7 +53,7 @@ func BenchmarkReadAllFast(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
-		stream := WriteAllScalar(nums)
+		stream := writer.WriteAllScalar(nums)
 		out := make([]uint32, count)
 		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
@@ -70,7 +71,7 @@ var readSinkB []uint32
 func BenchmarkFastRead(b *testing.B) {
 	count := 4096
 	nums := util.GenUint32(count)
-	stream := WriteAllScalar(nums)
+	stream := writer.WriteAllScalar(nums)
 	per := count*encode.MaxBytesPerNum
 	out := make([]uint32, count)
 	b.SetBytes(int64(per))
@@ -87,7 +88,7 @@ func BenchmarkReadAllScalar(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
-		stream := WriteAllScalar(nums)
+		stream := writer.WriteAllScalar(nums)
 		out := make([]uint32, count)
 		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
