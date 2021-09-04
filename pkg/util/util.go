@@ -82,3 +82,32 @@ func Delta(in []uint32, out []uint32) {
 		}
 	}
 }
+
+// MakeOutByteArr serves to create output arrays that occupy different parts
+// of the processor's cache line. This is done to ensure that the
+// benchmarks more accurately reflect real world performance characteristics.
+// Reusing the same output array in the benchmarks has the effect of
+// consistently hitting L1 cache, and to a lesser extent L2 and L3. Additionally,
+// depending on the array size, there's a good chance writes all hit the same
+// cache line which ultimately inflates the benchmark numbers
+//
+// An L1 cache size may likely be 64 KB and a cache line might be 64 bytes. Choose
+// a count and total number with these numbers in mind
+func MakeOutByteArr(count, total int) [][]byte {
+	toRet := make([][]byte, total)
+	for i := range toRet {
+		toRet[i] = make([]byte, count)
+	}
+
+	return toRet
+}
+
+// MakeOutUint32Arr serves the same purpose as MakeOutByteArr.
+func MakeOutUint32Arr(count, total int) [][]uint32 {
+	toRet := make([][]uint32, total)
+	for i := range toRet {
+		toRet[i] = make([]uint32, count)
+	}
+
+	return toRet
+}

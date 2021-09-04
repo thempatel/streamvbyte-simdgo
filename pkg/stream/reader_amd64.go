@@ -84,8 +84,8 @@ func FastReadAll(count int, stream []byte, out []uint32) []uint32 {
 // get8uint32Fast here is a convenience wrapper around the assembly impl
 // defined at decode.Get8uint32FastAsm. This is done to ensure that the
 // assembly func is inlined at the appropriate locations. Using
-// decode.Get8uint32Fast here adds another non-lined func despite the simplicity
-// of the wrapper in that package.
+// decode.Get8uint32Fast here adds another non-inlined func despite the
+// simplicity of the wrapper in that package.
 func get8uint32Fast(in []byte, out []uint32, ctrl uint16) {
 	decode.Get8uint32FastAsm(in, out, ctrl,
 		shared.DecodeShuffleTable,

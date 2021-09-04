@@ -23,38 +23,40 @@ goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkMemCopy8Uint32-12    	451595326	         2.638 ns/op	12130.20 MB/s
+BenchmarkMemCopy8Uint32-12    	100000000	        10.21 ns/op	3133.76 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkGet8uint32Fast-12           	370476554	         3.240 ns/op	9877.36 MB/s
-BenchmarkGet8uint32DeltaFast-12      	307157118	         3.954 ns/op	8092.42 MB/s
-BenchmarkGet8uint32Scalar-12         	65069227	        17.82 ns/op	1795.66 MB/s
-BenchmarkGet8uint32DeltaScalar-12    	60761964	        19.00 ns/op	1684.31 MB/s
-BenchmarkGet8uint32Varint-12         	25856181	        49.26 ns/op	 649.61 MB/s
-BenchmarkGet8uint32DeltaVarint-12    	20839513	        56.03 ns/op	 571.09 MB/s
+BenchmarkGet8uint32Fast-12           	100000000	        10.20 ns/op	3136.74 MB/s
+BenchmarkGet8uint32DeltaFast-12      	98791792	        12.10 ns/op	2643.68 MB/s
+BenchmarkGet8uint32Scalar-12         	46280936	        26.70 ns/op	1198.41 MB/s
+BenchmarkGet8uint32DeltaScalar-12    	47567101	        24.97 ns/op	1281.58 MB/s
+BenchmarkGet8uint32Varint-12         	14046168	        84.36 ns/op	 379.34 MB/s
+BenchmarkGet8uint32DeltaVarint-12    	12980152	        98.10 ns/op	 326.20 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkPut8uint32Fast-12           	304615611	         3.923 ns/op	8157.00 MB/s
-BenchmarkPut8uint32DeltaFast-12      	268239706	         4.398 ns/op	7276.04 MB/s
-BenchmarkPut8uint32Scalar-12         	39322816	        30.47 ns/op	1050.22 MB/s
-BenchmarkPut8uint32DeltaScalar-12    	38640381	        30.36 ns/op	1054.17 MB/s
-BenchmarkPut8uint32Varint-12         	56183851	        24.00 ns/op	1333.27 MB/s
-BenchmarkPut8uint32DeltaVarint-12    	51245528	        23.02 ns/op	1390.33 MB/s
+BenchmarkPut8uint32Fast-12           	100000000	        11.12 ns/op	2876.60 MB/s
+BenchmarkPut8uint32DeltaFast-12      	100000000	        11.55 ns/op	2771.15 MB/s
+BenchmarkPut8uint32Scalar-12         	34214346	        35.34 ns/op	 905.52 MB/s
+BenchmarkPut8uint32DeltaScalar-12    	34276888	        34.74 ns/op	 921.05 MB/s
+BenchmarkPut8uint32Varint-12         	41783278	        33.41 ns/op	 957.67 MB/s
+BenchmarkPut8uint32DeltaVarint-12    	44877816	        32.45 ns/op	 986.23 MB/s
 ```
 
 A note on the benchmarks: An array of random uint32's is generated and then encoded/decoded over
-and over again. In this case, the processor is able to predict the branches in the Varint code paths
-really well, since the input numbers never change. The resulting speed improvements reflect that, and
-likely to a larger extent, that Varint is a faster algorithm for smaller numbers. The benchmark
-numbers favor the scalar approach as the size of the input integers goes up.
+and over again. An attempt is made to ensure that these benchmarks reflect the most probable real
+world performance metrics. Enough output arrays are generated to flood the L1 cache on the above
+processor and the size of each output array is one that fits within a cache line. Typically, when
+encoding/decoding a large quantity of integers, the output memory locations will be dispersed like
+this and stores to cache lines may have to evict old ones and wait on those lines to be persisted
+to main memory.
 
 ---
 Stream VByte uses the same underlying format as Google's Group Varint approach. Lemire et al. wanted

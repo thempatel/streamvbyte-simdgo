@@ -43,16 +43,16 @@ func TestRoundTripScalar(t *testing.T) {
 }
 
 func BenchmarkMemCopy8Uint32(b *testing.B) {
-	count := 8
+	count := 12
 	nums := make([]uint32, count)
 	for i := 0; i < count; i++ {
 		nums[i] = util.RandUint32()
 	}
 
-	dest := make([]uint32, count)
+	out := util.MakeOutUint32Arr(12, 1023)
 	b.SetBytes(32)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		copy(dest, nums)
+		copy(out[i%len(out)], nums)
 	}
 }
