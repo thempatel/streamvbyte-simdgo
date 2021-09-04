@@ -97,12 +97,8 @@ BenchmarkWriteAllScalar/Count:_10000000-12         	      10	 105130478 ns/op	 3
 ```
 
 A note on the benchmarks: An array of random uint32's is generated and then encoded/decoded over
-and over again. An attempt is made to ensure that these benchmarks reflect the most probable real
-world performance metrics. Enough output arrays are generated to flood the L1 cache on the above
-processor and the size of each output array is one that fits within a cache line. Typically, when
-encoding/decoding a large quantity of integers, the output memory locations will be dispersed like
-this and stores to cache lines may have to evict old ones and wait on those lines to be persisted
-to main memory.
+and over again. An attempt is made to ensure that some of these benchmarks reflect the most probable
+real world performance metrics.
 
 ---
 Stream VByte uses the same underlying format as Google's Group Varint approach. Lemire et al. wanted
