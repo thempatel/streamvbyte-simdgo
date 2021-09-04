@@ -30,50 +30,50 @@ func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
 		lowest32 = ((ctrlLen-3)*4) &^ 31
 	)
 
-	_ = out[:count]
 	for ; decoded < lowest32; decoded += 32 {
 		data := stream[dataPos:]
-		_ = stream[ctrlPos+8] // bounds check hint
+		ctrls := stream[ctrlPos:ctrlPos+8] // bounds check hint
+		nums := out[decoded:decoded+32]
 
-		ctrl := uint16(stream[ctrlPos]) | uint16(stream[ctrlPos+1]) << 8
+		ctrl := uint16(ctrls[0]) | uint16(ctrls[1]) << 8
 		decode.Get8uint32FastAsm(
 			data,
-			out[decoded:],
+			nums,
 			ctrl,
 			shared.DecodeShuffleTable,
 			shared.PerControlLenTable,
 		)
-		sizeA := shared.ControlByteToSize(stream[ctrlPos]) + shared.ControlByteToSize(stream[ctrlPos+1])
+		sizeA := shared.ControlByteToSize(ctrls[0]) + shared.ControlByteToSize(ctrls[1])
 
-		ctrl = uint16(stream[ctrlPos+2]) | uint16(stream[ctrlPos+3]) << 8
+		ctrl = uint16(ctrls[2]) | uint16(ctrls[3]) << 8
 		decode.Get8uint32FastAsm(
 			data[sizeA:],
-			out[decoded+8:],
+			nums[8:],
 			ctrl,
 			shared.DecodeShuffleTable,
 			shared.PerControlLenTable,
 		)
-		sizeB := shared.ControlByteToSize(stream[ctrlPos+2]) + shared.ControlByteToSize(stream[ctrlPos+3])
+		sizeB := shared.ControlByteToSize(ctrls[2]) + shared.ControlByteToSize(ctrls[3])
 
-		ctrl = uint16(stream[ctrlPos+4]) | uint16(stream[ctrlPos+5]) << 8
+		ctrl = uint16(ctrls[4]) | uint16(ctrls[5]) << 8
 		decode.Get8uint32FastAsm(
 			data[sizeA+sizeB:],
-			out[decoded+16:],
+			nums[16:],
 			ctrl,
 			shared.DecodeShuffleTable,
 			shared.PerControlLenTable,
 		)
-		sizeC := shared.ControlByteToSize(stream[ctrlPos+4]) + shared.ControlByteToSize(stream[ctrlPos+5])
+		sizeC := shared.ControlByteToSize(ctrls[4]) + shared.ControlByteToSize(ctrls[5])
 
-		ctrl = uint16(stream[ctrlPos+6]) | uint16(stream[ctrlPos+7]) << 8
+		ctrl = uint16(ctrls[6]) | uint16(ctrls[7]) << 8
 		decode.Get8uint32FastAsm(
 			data[sizeA+sizeB+sizeC:],
-			out[decoded+24:],
+			nums[24:],
 			ctrl,
 			shared.DecodeShuffleTable,
 			shared.PerControlLenTable,
 		)
-		sizeD := shared.ControlByteToSize(stream[ctrlPos+6]) + shared.ControlByteToSize(stream[ctrlPos+7])
+		sizeD := shared.ControlByteToSize(ctrls[6]) + shared.ControlByteToSize(ctrls[7])
 
 		dataPos += sizeA + sizeB + sizeC + sizeD
 		ctrlPos += 8
