@@ -30,12 +30,16 @@ func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
 		lowest32 = ((ctrlLen-3)*4) &^ 31
 	)
 
+	_ = out[:count]
 	for ; decoded < lowest32; decoded += 32 {
 		data := stream[dataPos:]
+		_ = stream[ctrlPos+8] // bounds check hint
 
 		ctrl := uint16(stream[ctrlPos]) | uint16(stream[ctrlPos+1]) << 8
 		decode.Get8uint32FastAsm(
-			data, out[decoded:], ctrl,
+			data,
+			out[decoded:],
+			ctrl,
 			shared.DecodeShuffleTable,
 			shared.PerControlLenTable,
 		)
@@ -43,7 +47,9 @@ func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
 
 		ctrl = uint16(stream[ctrlPos+2]) | uint16(stream[ctrlPos+3]) << 8
 		decode.Get8uint32FastAsm(
-			data[sizeA:], out[decoded+8:], ctrl,
+			data[sizeA:],
+			out[decoded+8:],
+			ctrl,
 			shared.DecodeShuffleTable,
 			shared.PerControlLenTable,
 		)
@@ -51,7 +57,9 @@ func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
 
 		ctrl = uint16(stream[ctrlPos+4]) | uint16(stream[ctrlPos+5]) << 8
 		decode.Get8uint32FastAsm(
-			data[sizeA+sizeB:], out[decoded+16:], ctrl,
+			data[sizeA+sizeB:],
+			out[decoded+16:],
+			ctrl,
 			shared.DecodeShuffleTable,
 			shared.PerControlLenTable,
 		)
@@ -59,7 +67,9 @@ func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
 
 		ctrl = uint16(stream[ctrlPos+6]) | uint16(stream[ctrlPos+7]) << 8
 		decode.Get8uint32FastAsm(
-			data[sizeA+sizeB+sizeC:], out[decoded+24:], ctrl,
+			data[sizeA+sizeB+sizeC:],
+			out[decoded+24:],
+			ctrl,
 			shared.DecodeShuffleTable,
 			shared.PerControlLenTable,
 		)
@@ -74,7 +84,9 @@ func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
 	for ; ctrlPos < ctrlLen-4; ctrlPos += 2 {
 		ctrl := uint16(stream[ctrlPos]) | uint16(stream[ctrlPos+1]) << 8
 		decode.Get8uint32FastAsm(
-			stream[dataPos:], out[decoded:], ctrl,
+			stream[dataPos:],
+			out[decoded:],
+			ctrl,
 			shared.DecodeShuffleTable,
 			shared.PerControlLenTable,
 		)
@@ -88,8 +100,10 @@ func ReadAllFast(count int, stream []byte, out []uint32) []uint32 {
 			nums = 4
 		}
 		dataPos += decode.GetUint32Scalar(
-			stream[dataPos:], out[decoded:],
-			stream[ctrlPos], nums,
+			stream[dataPos:],
+			out[decoded:],
+			stream[ctrlPos],
+			nums,
 		)
 		decoded += nums
 	}

@@ -49,10 +49,10 @@ func BenchmarkMemCopy8Uint32(b *testing.B) {
 		nums[i] = util.RandUint32()
 	}
 
-	out := util.MakeOutUint32Arr(12, 1023)
+	out := make([]uint32, count)
 	b.SetBytes(int64(count*encode.MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		copy(out[i%len(out)], nums)
+		copy(out, nums)
 	}
 }
