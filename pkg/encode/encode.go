@@ -12,15 +12,19 @@ const (
 
 var (
 	putImpl Put8Impl
+	putDeltaImpl Put8DeltaImpl
 )
 
-type Put8Impl func([]uint32, []byte) uint16
+type Put8Impl func(in []uint32, out []byte) (ctrl uint16)
+type Put8DeltaImpl func(in []uint32, out []byte, prev uint32) (ctrl uint16)
 
 func init() {
 	if GetMode() == shared.Fast {
-		putImpl = put8uint32
+		putImpl = Put8uint32Fast
+		putDeltaImpl = Put8uint32DeltaFast
 	} else {
 		putImpl = Put8uint32Scalar
+		putDeltaImpl = Put8uint32DeltaScalar
 	}
 }
 
@@ -31,6 +35,44 @@ func init() {
 // scalar implementation will be used as the fallback.
 func Put8uint32(in []uint32, out []byte) uint16 {
 	return putImpl(in, out)
+}
+
+// Put8uint32Delta is a general func you can use to encode 8 differentially coded
+// uint32's with at a time. It will use the fastest implementation available
+// determined during package initialization. If your CPU supports special hardware
+// instructions then it will use an accelerated version of Stream VByte. Otherwise,
+// the scalar implementation will be used as the fallback.
+func Put8uint32Delta(in []uint32, out []byte, prev uint32) uint16 {
+	return putDeltaImpl(in, out, prev)
+}
+
+// PutUint32Scalar encodes up to 4 integers from in into out using the
+// Stream VByte format.
+//
+// Note: It is your responsibility to ensure that the incoming slices have
+// the appropriate sizes and data otherwise this func will panic.
+func PutUint32Scalar(in []uint32, out []byte, count int) uint8 {
+	if count == 0 {
+		return 0
+	}
+
+	if count > 4 {
+		count = 4
+	}
+
+	var (
+		ctrl uint8
+		shift = 0
+		total = 0
+	)
+	for i := 0; i < count; i++ {
+		size := encodeOne(in[i], out[total:])
+		total += size
+		ctrl |= uint8(size-1)<<shift
+		shift += 2
+	}
+
+	return ctrl
 }
 
 // Put8uint32Scalar will encode 8 uint32 values from in into out using the
@@ -92,7 +134,7 @@ func Put4uint32Scalar(in []uint32, out []byte) uint8 {
 	return uint8((len0 - 1) | (len1-1)<<2 | (len2-1)<<4 | (len3-1)<<6)
 }
 
-// Put8uint32DiffScalar will differentially encode 8 uint32 values from in into out.
+// Put8uint32DeltaScalar will differentially encode 8 uint32 values from in into out.
 // Prev provides a way for you to indicate the base value for this batch of 8.
 // For example, when encoding the second batch of 8 integers out of, e.g. 16, you would
 // provide a prev value of the last value in the first batch of 8 you encoded. This
@@ -102,16 +144,16 @@ func Put4uint32Scalar(in []uint32, out []byte) uint8 {
 // Input:	[ 10, 20, 30, 40, 50, 60, 70, 80 ] [ 90, 100, 110, 120, 130, 140, 150, 160 ]
 // Output:	[ 10, 10, 10, 10, 10, 10, 10, 10 ] [ 10, 10, 10, 10, 10, 10, 10, 10 ]
 // Prev: 80
-func Put8uint32DiffScalar(in []uint32, out []byte, prev uint32) uint16 {
+func Put8uint32DeltaScalar(in []uint32, out []byte, prev uint32) uint16 {
 	var ctrl uint16
-	first := Put4uint32DiffScalar(in, out, prev)
+	first := Put4uint32DeltaScalar(in, out, prev)
 	ctrl |= uint16(first)
 	encoded := shared.ControlByteToSize(first)
-	second := Put4uint32DiffScalar(in[4:], out[encoded:], in[3])
+	second := Put4uint32DeltaScalar(in[4:], out[encoded:], in[3])
 	return ctrl | uint16(second)<<8
 }
 
-// Put4uint32DiffScalar will differentially encode 4 uint32 values from in into out.
+// Put4uint32DeltaScalar will differentially encode 4 uint32 values from in into out.
 // Prev provides a way for you to indicate the base value for this batch of 4.
 // For example, when encoding the second batch of 4 integers out of, e.g. 8, you would
 // provide a prev value of the last value in the first batch of 4 you encoded. This
@@ -121,7 +163,7 @@ func Put8uint32DiffScalar(in []uint32, out []byte, prev uint32) uint16 {
 // Input:	[ 10, 20, 30, 40 ] [ 50, 60, 70, 80 ]
 // Output:	[ 10, 10, 10, 10 ] [ 10, 10, 10, 10 ]
 // Prev: 40
-func Put4uint32DiffScalar(in []uint32, out []byte, prev uint32) uint8 {
+func Put4uint32DeltaScalar(in []uint32, out []byte, prev uint32) uint8 {
 	// bounds check hint to compiler
 	_ = in[3]
 

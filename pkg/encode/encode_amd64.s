@@ -8,9 +8,9 @@ GLOBL mask0101<>(SB), RODATA|NOPTR, $2
 DATA mask7F00<>+0(SB)/2, $0x7f00
 GLOBL mask7F00<>(SB), RODATA|NOPTR, $2
 
-// func put8uint32Fast(in []uint32, outBytes []byte, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
+// func Put8uint32FastAsm(in []uint32, outBytes []byte, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
 // Requires: AVX, AVX2
-TEXT ·put8uint32Fast(SB), NOSPLIT, $0-66
+TEXT ·Put8uint32FastAsm(SB), NOSPLIT, $0-66
 	MOVQ         in_base+0(FP), AX
 	VLDDQU       (AX), X0
 	VLDDQU       16(AX), X1
@@ -44,9 +44,9 @@ TEXT ·put8uint32Fast(SB), NOSPLIT, $0-66
 	VMOVDQU      X1, (DX)
 	RET
 
-// func put8uint32DiffFast(in []uint32, outBytes []byte, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
+// func Put8uint32DeltaFastAsm(in []uint32, outBytes []byte, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint16)
 // Requires: AVX, AVX2
-TEXT ·put8uint32DiffFast(SB), NOSPLIT, $0-74
+TEXT ·Put8uint32DeltaFastAsm(SB), NOSPLIT, $0-74
 	MOVQ         in_base+0(FP), AX
 	VLDDQU       (AX), X0
 	VLDDQU       16(AX), X1

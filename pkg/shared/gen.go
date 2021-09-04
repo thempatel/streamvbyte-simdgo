@@ -7,5 +7,5 @@ func ControlByteToSize(in uint8) int {
 }
 
 func ControlByteToSizeTwo(in uint16) int {
-	return int(PerControlLenTable[in&0xFF] + PerControlLenTable[in>>8])
+	return int(PerControlLenTable[in&0xff] + PerControlLenTable[in>>8])
 }

@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	name      = "put8uint32Fast"
-	nameDiff  = "put8uint32DiffFast"
+	name      = "Put8uint32FastAsm"
+	nameDelta  = "Put8uint32DeltaFastAsm"
 	pIn       = "in"
 	pOut      = "outBytes"
 	pShuffle  = "shuffle"
@@ -26,7 +26,7 @@ var (
 		"func(%s []uint32, %s []byte, %s *[256][16]uint8, %s *[256]uint8) (%s uint16)",
 		pIn, pOut, pShuffle, pLenTable, pR)
 
-	signatureDiff = fmt.Sprintf(
+	signatureDelta = fmt.Sprintf(
 		"func(%s []uint32, %s []byte, %s uint32, %s *[256][16]uint8, %s *[256]uint8) (%s uint16)",
 		pIn, pOut, pPrev, pShuffle, pLenTable, pR)
 
@@ -41,7 +41,7 @@ func main() {
 }
 
 func differential() {
-	TEXT(nameDiff, NOSPLIT, signatureDiff)
+	TEXT(nameDelta, NOSPLIT, signatureDelta)
 
 	prevSingular, err := Param(pPrev).Resolve()
 	if err != nil {

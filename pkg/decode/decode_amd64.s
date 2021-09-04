@@ -2,9 +2,9 @@
 
 #include "textflag.h"
 
-// func get8uint32Fast(in []byte, out []uint32, ctrl uint16, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint64)
+// func Get8uint32FastAsm(in []byte, out []uint32, ctrl uint16, shuffle *[256][16]uint8, lenTable *[256]uint8)
 // Requires: AVX
-TEXT ·get8uint32Fast(SB), NOSPLIT, $0-80
+TEXT ·Get8uint32FastAsm(SB), NOSPLIT, $0-72
 	MOVWQZX ctrl+48(FP), AX
 	MOVQ    shuffle+56(FP), CX
 	MOVBQZX AL, DX
@@ -17,17 +17,10 @@ TEXT ·get8uint32Fast(SB), NOSPLIT, $0-80
 	MOVQ    in_base+0(FP), CX
 	MOVQ    CX, SI
 	MOVQ    lenTable+64(FP), DI
-	MOVBQZX AL, R8
-	ADDQ    DI, R8
-	MOVBQZX (R8), R8
-	ADDQ    R8, SI
-	MOVQ    lenTable+64(FP), DI
-	MOVWQZX AX, AX
-	SHRQ    $0x08, AX
+	MOVBQZX AL, AX
 	ADDQ    DI, AX
 	MOVBQZX (AX), AX
-	ADDQ    AX, R8
-	MOVQ    R8, r+72(FP)
+	ADDQ    AX, SI
 	VLDDQU  (CX), X0
 	VLDDQU  (SI), X1
 	VPSHUFB (DX), X0, X0
@@ -37,9 +30,9 @@ TEXT ·get8uint32Fast(SB), NOSPLIT, $0-80
 	VMOVDQU X1, 16(AX)
 	RET
 
-// func get8uint32DiffFast(in []byte, out []uint32, ctrl uint16, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8) (r uint64)
+// func Get8uint32DeltaFastAsm(in []byte, out []uint32, ctrl uint16, prev uint32, shuffle *[256][16]uint8, lenTable *[256]uint8)
 // Requires: AVX
-TEXT ·get8uint32DiffFast(SB), NOSPLIT, $0-80
+TEXT ·Get8uint32DeltaFastAsm(SB), NOSPLIT, $0-72
 	MOVWQZX      ctrl+48(FP), AX
 	MOVQ         shuffle+56(FP), CX
 	MOVBQZX      AL, DX
@@ -52,17 +45,10 @@ TEXT ·get8uint32DiffFast(SB), NOSPLIT, $0-80
 	MOVQ         in_base+0(FP), CX
 	MOVQ         CX, SI
 	MOVQ         lenTable+64(FP), DI
-	MOVBQZX      AL, R8
-	ADDQ         DI, R8
-	MOVBQZX      (R8), R8
-	ADDQ         R8, SI
-	MOVQ         lenTable+64(FP), DI
-	MOVWQZX      AX, AX
-	SHRQ         $0x08, AX
+	MOVBQZX      AL, AX
 	ADDQ         DI, AX
 	MOVBQZX      (AX), AX
-	ADDQ         AX, R8
-	MOVQ         R8, r+72(FP)
+	ADDQ         AX, SI
 	VLDDQU       (CX), X0
 	VLDDQU       (SI), X1
 	VPSHUFB      (DX), X0, X0

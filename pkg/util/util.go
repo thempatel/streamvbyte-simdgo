@@ -41,7 +41,7 @@ func GetVarint(data []byte, out []uint32) int {
 	return pos
 }
 
-func PutDiffVarint(nums []uint32, out []byte, prev uint32) int {
+func PutDeltaVarint(nums []uint32, out []byte, prev uint32) int {
 	pos := 0
 	for i := range nums {
 		size := binary.PutUvarint(out[pos:], uint64(nums[i]-prev))
@@ -52,7 +52,7 @@ func PutDiffVarint(nums []uint32, out []byte, prev uint32) int {
 	return pos
 }
 
-func GetDiffVarint(in []byte, out []uint32, prev uint32) int {
+func GetDeltaVarint(in []byte, out []uint32, prev uint32) int {
 	pos := 0
 	i := 0
 	for pos < len(in) {
@@ -73,7 +73,7 @@ func SortUint32(in []uint32) {
 	})
 }
 
-func Diff(in []uint32, out []uint32) {
+func Delta(in []uint32, out []uint32) {
 	for i := range in {
 		if i > 0 {
 			out[i] = in[i] - in[i-1]

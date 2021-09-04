@@ -17,44 +17,88 @@ There are several existing implementations:
 
 ## Benchmarks
 
-```
+```text
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkCopy-12    	467161464	         2.570 ns/op	12453.40 MB/s
+BenchmarkMemCopy8Uint32-12    	455012947	         2.686 ns/op	11911.44 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/decode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkGet8uint32Fast-12          	330213674	         3.614 ns/op	8855.45 MB/s
-BenchmarkGet8uint32DiffFast-12      	274969924	         4.370 ns/op	7322.62 MB/s
-BenchmarkGet8uint32Scalar-12        	53956873	        19.89 ns/op	1608.71 MB/s
-BenchmarkGet8uint32DiffScalar-12    	52124692	        23.00 ns/op	1391.40 MB/s
-BenchmarkGet8uint32Varint-12        	25916104	        44.01 ns/op	 727.12 MB/s
-BenchmarkGet8uint32DiffVarint-12    	22726515	        58.82 ns/op	 544.03 MB/s
+BenchmarkGet8uint32Fast-12           	373917049	         3.270 ns/op	9786.01 MB/s
+BenchmarkGet8uint32DeltaFast-12      	302560959	         4.028 ns/op	7943.70 MB/s
+BenchmarkGet8uint32Scalar-12         	66383433	        17.97 ns/op	1781.20 MB/s
+BenchmarkGet8uint32DeltaScalar-12    	63747897	        18.21 ns/op	1756.96 MB/s
+BenchmarkGet8uint32Varint-12         	26679096	        50.37 ns/op	 635.26 MB/s
+BenchmarkGet8uint32DeltaVarint-12    	21061335	        53.94 ns/op	 593.20 MB/s
 
 goos: darwin
 goarch: amd64
 pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/encode
 cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
 --
-BenchmarkPut8uint32Fast-12          	313462341	         3.835 ns/op	8343.99 MB/s
-BenchmarkPut8uint32DiffFast-12      	271562272	         4.286 ns/op	7466.90 MB/s
-BenchmarkPut8uint32Scalar-12        	41348114	        28.92 ns/op	1106.53 MB/s
-BenchmarkPut8uint32DiffScalar-12    	38365390	        29.55 ns/op	1082.91 MB/s
-BenchmarkPut8uint32Varint-12        	59726191	        21.28 ns/op	1504.05 MB/s
-BenchmarkPut8uint32DiffVarint-12    	55234234	        20.33 ns/op	1574.04 MB/s
+BenchmarkPut8uint32Fast-12           	306290095	         3.960 ns/op	8080.60 MB/s
+BenchmarkPut8uint32DeltaFast-12      	274433187	         4.446 ns/op	7197.80 MB/s
+BenchmarkPut8uint32Scalar-12         	41935557	        30.29 ns/op	1056.52 MB/s
+BenchmarkPut8uint32DeltaScalar-12    	38511097	        31.85 ns/op	1004.65 MB/s
+BenchmarkPut8uint32Varint-12         	54379350	        23.38 ns/op	1368.98 MB/s
+BenchmarkPut8uint32DeltaVarint-12    	60884721	        19.94 ns/op	1604.79 MB/s
+
+goos: darwin
+goarch: amd64
+pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/stream/reader
+cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
+--
+BenchmarkReadAllFast/Count:_1-12         	99843394	        11.82 ns/op	 338.51 MB/s
+BenchmarkReadAllFast/Count:_10-12        	27126201	        42.60 ns/op	 939.01 MB/s
+BenchmarkReadAllFast/Count:_100-12       	11160085	       107.6 ns/op	3718.00 MB/s
+BenchmarkReadAllFast/Count:_1000-12      	 1658932	       722.9 ns/op	5533.47 MB/s
+BenchmarkReadAllFast/Count:_10000-12     	  174272	      6984 ns/op	5727.52 MB/s
+BenchmarkReadAllFast/Count:_100000-12    	   16840	     70349 ns/op	5685.90 MB/s
+BenchmarkReadAllFast/Count:_1000000-12   	    1597	    720816 ns/op	5549.27 MB/s
+BenchmarkReadAllFast/Count:_10000000-12  	     153	   7716547 ns/op	5183.67 MB/s
+BenchmarkFastRead-12                     	  411036	      2887 ns/op	5675.67 MB/s
+BenchmarkReadAllScalar/Count:_1-12       	130513644	         9.205 ns/op	 434.53 MB/s
+BenchmarkReadAllScalar/Count:_10-12      	39314558	        30.92 ns/op	1293.79 MB/s
+BenchmarkReadAllScalar/Count:_100-12     	 4700821	       254.1 ns/op	1573.93 MB/s
+BenchmarkReadAllScalar/Count:_1000-12    	  481141	      2516 ns/op	1589.54 MB/s
+BenchmarkReadAllScalar/Count:_10000-12   	   17628	     68188 ns/op	 586.61 MB/s
+BenchmarkReadAllScalar/Count:_100000-12  	    1540	    778291 ns/op	 513.95 MB/s
+BenchmarkReadAllScalar/Count:_1000000-12 	     153	   7800029 ns/op	 512.82 MB/s
+BenchmarkReadAllScalar/Count:_10000000-12         	      14	  78333151 ns/op	 510.64 MB/s
+
+goos: darwin
+goarch: amd64
+pkg: github.com/theMPatel/streamvbyte-simdgo/pkg/stream/writer
+cpu: Intel(R) Core(TM) i7-8700B CPU @ 3.20GHz
+--
+BenchmarkWriteAllFast/Count:_1-12         	54035500	        22.28 ns/op	 179.50 MB/s
+BenchmarkWriteAllFast/Count:_10-12        	27856591	        42.14 ns/op	 949.16 MB/s
+BenchmarkWriteAllFast/Count:_100-12       	 7235343	       165.3 ns/op	2419.59 MB/s
+BenchmarkWriteAllFast/Count:_1000-12      	  989134	      1228 ns/op	3256.46 MB/s
+BenchmarkWriteAllFast/Count:_10000-12     	  101655	     11615 ns/op	3443.77 MB/s
+BenchmarkWriteAllFast/Count:_100000-12    	   10000	    110652 ns/op	3614.94 MB/s
+BenchmarkWriteAllFast/Count:_1000000-12   	     928	   1211587 ns/op	3301.45 MB/s
+BenchmarkWriteAllFast/Count:_10000000-12  	     104	  10057733 ns/op	3977.04 MB/s
+BenchmarkFastWrite-12                     	  246242	      4786 ns/op	3423.60 MB/s
+BenchmarkWriteAllScalar/Count:_1-12       	57303043	        21.12 ns/op	 189.41 MB/s
+BenchmarkWriteAllScalar/Count:_10-12      	19084470	        62.15 ns/op	 643.62 MB/s
+BenchmarkWriteAllScalar/Count:_100-12     	 2759889	       439.4 ns/op	 910.35 MB/s
+BenchmarkWriteAllScalar/Count:_1000-12    	  285151	      4210 ns/op	 950.19 MB/s
+BenchmarkWriteAllScalar/Count:_10000-12   	   10000	    100583 ns/op	 397.68 MB/s
+BenchmarkWriteAllScalar/Count:_100000-12  	    1142	   1046886 ns/op	 382.09 MB/s
+BenchmarkWriteAllScalar/Count:_1000000-12 	     100	  10514884 ns/op	 380.41 MB/s
+BenchmarkWriteAllScalar/Count:_10000000-12         	      10	 105130478 ns/op	 380.48 MB/s
 ```
 
 A note on the benchmarks: An array of random uint32's is generated and then encoded/decoded over
-and over again. In this case, the processor is able to predict the branches in the Varint code paths
-really well, since the input numbers never change. The resulting speed improvements reflect that, and
-likely to a larger extent, that Varint is a faster algorithm for smaller numbers. The benchmark
-numbers favor the scalar approach as the size of the input integers goes up.
+and over again. An attempt is made to ensure that some of these benchmarks reflect the most probable
+real world performance metrics.
 
 ---
 Stream VByte uses the same underlying format as Google's Group Varint approach. Lemire et al. wanted

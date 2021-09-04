@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	name     = "get8uint32Fast"
-	nameDiff = "get8uint32DiffFast"
+	name     = "Get8uint32FastAsm"
+	nameDelta = "Get8uint32DeltaFastAsm"
 
 	pIn       = "in"
 	pOut      = "out"
@@ -20,17 +20,16 @@ const (
 	pShuffle  = "shuffle"
 	pLenTable = "lenTable"
 	pPrev     = "prev"
-	pR        = "r"
 )
 
 var (
 	signature = fmt.Sprintf(
-		"func(%s []byte, %s []uint32, %s uint16, %s *[256][16]uint8, %s *[256]uint8) (%s uint64)",
-		pIn, pOut, pCtrl, pShuffle, pLenTable, pR)
+		"func(%s []byte, %s []uint32, %s uint16, %s *[256][16]uint8, %s *[256]uint8)",
+		pIn, pOut, pCtrl, pShuffle, pLenTable)
 
-	signatureDiff = fmt.Sprintf(
-		"func(%s []byte, %s []uint32, %s uint16, %s uint32, %s *[256][16]uint8, %s *[256]uint8) (%s uint64)",
-		pIn, pOut, pCtrl, pPrev, pShuffle, pLenTable, pR)
+	signatureDelta = fmt.Sprintf(
+		"func(%s []byte, %s []uint32, %s uint16, %s uint32, %s *[256][16]uint8, %s *[256]uint8)",
+		pIn, pOut, pCtrl, pPrev, pShuffle, pLenTable)
 )
 
 func main() {
@@ -52,7 +51,7 @@ func regular() {
 }
 
 func differential() {
-	TEXT(nameDiff, NOSPLIT, signatureDiff)
+	TEXT(nameDelta, NOSPLIT, signatureDelta)
 
 	firstFour, secondFour := coreAlgorithm() // [A B C D] [E F G H]
 	prevSingular, err := Param(pPrev).Resolve()
@@ -62,10 +61,10 @@ func differential() {
 
 	prev := XMM()
 	VBROADCASTSS(prevSingular.Addr, prev) // [P P P P]
-	undoDiff(firstFour, prev)
+	undoDelta(firstFour, prev)
 
 	VPSHUFD(operand.Imm(0xff), firstFour, prev) // [A B C D] -> [D D D D]
-	undoDiff(secondFour, prev)
+	undoDelta(secondFour, prev)
 
 	outBase := operand.Mem{Base: Load(Param(pOut).Base(), GP64())}
 
@@ -75,7 +74,7 @@ func differential() {
 	RET()
 }
 
-func undoDiff(four, prev reg.VecVirtual) {
+func undoDelta(four, prev reg.VecVirtual) {
 	adder := XMM()                       // [A B C D]
 	VPSLLDQ(operand.Imm(4), four, adder) // [- A  B  C]
 	VPADDD(four, adder, four)            // [A AB BC CD]
@@ -99,11 +98,6 @@ func coreAlgorithm() (reg.VecVirtual, reg.VecVirtual) {
 
 	MOVBQZX(lowerAddr, lowerSize)
 	ADDQ(lowerSize, secondBlock)
-
-	upperAddr, upperSize := shared.LenValueAddr(ctrl, true, pLenTable)
-	MOVBQZX(upperAddr, upperSize)
-	ADDQ(upperSize, lowerSize)
-	Store(lowerSize, Return(pR))
 
 	firstFour := XMM()
 	secondFour := XMM()

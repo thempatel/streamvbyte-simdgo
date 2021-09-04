@@ -35,29 +35,24 @@ func TestRoundTripScalar(t *testing.T) {
 	}
 
 	decoded := make([]uint32, 8)
-	read := decode.Get4uint32Scalar(actualData, decoded, uint8(actualCtrl&0xff))
-	read += decode.Get4uint32Scalar(actualData[read:], decoded[4:], uint8(actualCtrl>>8))
-
-	if read != len(expectedData) {
-		t.Fatalf("expected %d, actual %d", len(expectedData), read)
-	}
+	decode.Get8uint32Scalar(actualData, decoded, actualCtrl)
 
 	if !reflect.DeepEqual(in, decoded) {
 		t.Fatalf("expected %+v, actual %+v", in, decoded)
 	}
 }
 
-func BenchmarkCopy(b *testing.B) {
+func BenchmarkMemCopy8Uint32(b *testing.B) {
 	count := 8
 	nums := make([]uint32, count)
 	for i := 0; i < count; i++ {
 		nums[i] = util.RandUint32()
 	}
 
-	dest := make([]uint32, count)
-	b.SetBytes(32)
+	out := make([]uint32, count)
+	b.SetBytes(int64(count*encode.MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		copy(dest, nums)
+		copy(out, nums)
 	}
 }

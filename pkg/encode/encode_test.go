@@ -35,19 +35,19 @@ func TestPut8uint32Scalar(t *testing.T) {
 	}
 }
 
-func TestPut8uint32DiffScalar(t *testing.T) {
+func TestPut8uint32DeltaScalar(t *testing.T) {
 	count := 8
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
 	diffed := make([]uint32, count)
-	util.Diff(nums, diffed)
+	util.Delta(nums, diffed)
 
 	expectedData := make([]byte, count*MaxBytesPerNum)
 	expectedCtrl := Put8uint32Scalar(diffed, expectedData)
 	expectedData = expectedData[:shared.ControlByteToSizeTwo(expectedCtrl)]
 
 	out := make([]byte, count*MaxBytesPerNum)
-	actualCtrl := Put8uint32DiffScalar(nums, out, 0)
+	actualCtrl := Put8uint32DeltaScalar(nums, out, 0)
 	if actualCtrl != expectedCtrl {
 		t.Fatalf("expected: %#016b, got %#016b, %+v", expectedCtrl, actualCtrl, nums)
 	}
@@ -71,7 +71,7 @@ func TestPut8uint32Fast(t *testing.T) {
 	out = out[:shared.ControlByteToSizeTwo(scalarCtrl)]
 
 	fastOut := make([]byte, MaxBytesPerNum*count)
-	fastCtrl := put8uint32(nums, fastOut)
+	fastCtrl := Put8uint32Fast(nums, fastOut)
 	fastOut = fastOut[:shared.ControlByteToSizeTwo(fastCtrl)]
 
 	if scalarCtrl != fastCtrl {
@@ -83,7 +83,7 @@ func TestPut8uint32Fast(t *testing.T) {
 	}
 }
 
-func TestPut8uint32DiffFast(t *testing.T) {
+func TestPut8uint32DeltaFast(t *testing.T) {
 	if GetMode() == shared.Normal {
 		t.Skipf("Testing environment doesn't support this test")
 	}
@@ -93,11 +93,11 @@ func TestPut8uint32DiffFast(t *testing.T) {
 	util.SortUint32(nums)
 
 	expectedData := make([]byte, MaxBytesPerNum*count)
-	scalarCtrl := Put8uint32DiffScalar(nums, expectedData, 0)
+	scalarCtrl := Put8uint32DeltaScalar(nums, expectedData, 0)
 	expectedData = expectedData[:shared.ControlByteToSizeTwo(scalarCtrl)]
 
 	fastOut := make([]byte, MaxBytesPerNum*count)
-	fastCtrl := put8uint32Diff(nums, fastOut, 0)
+	fastCtrl := Put8uint32DeltaFast(nums, fastOut, 0)
 	fastOut = fastOut[:shared.ControlByteToSizeTwo(fastCtrl)]
 
 	if scalarCtrl != fastCtrl {
@@ -113,31 +113,31 @@ var writeSinkA uint16
 
 func BenchmarkPut8uint32Fast(b *testing.B) {
 	count := 8
+	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)
-	out := make([]byte, MaxBytesPerNum*count)
 
 	var ctrl uint16
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ctrl = put8uint32(nums, out)
+		ctrl = Put8uint32Fast(nums, out)
 	}
 	writeSinkA = ctrl
 }
 
 var writeSinkB uint16
 
-func BenchmarkPut8uint32DiffFast(b *testing.B) {
+func BenchmarkPut8uint32DeltaFast(b *testing.B) {
 	count := 8
+	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
-	out := make([]byte, MaxBytesPerNum*count)
 
 	var ctrl uint16
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ctrl = put8uint32Diff(nums, out, 0)
+		ctrl = Put8uint32DeltaFast(nums, out, 0)
 	}
 	writeSinkB = ctrl
 }
@@ -146,11 +146,11 @@ var writeSinkC uint16
 
 func BenchmarkPut8uint32Scalar(b *testing.B) {
 	count := 8
+	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)
-	out := make([]byte, MaxBytesPerNum*count)
 
 	var ctrl uint16
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ctrl = Put8uint32Scalar(nums, out)
@@ -160,17 +160,17 @@ func BenchmarkPut8uint32Scalar(b *testing.B) {
 
 var writeSinkD uint16
 
-func BenchmarkPut8uint32DiffScalar(b *testing.B) {
+func BenchmarkPut8uint32DeltaScalar(b *testing.B) {
 	count := 8
+	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
-	out := make([]byte, MaxBytesPerNum*count)
 
 	var ctrl uint16
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ctrl = Put8uint32DiffScalar(nums, out, 0)
+		ctrl = Put8uint32DeltaScalar(nums, out, 0)
 	}
 	writeSinkD = ctrl
 }
@@ -179,11 +179,11 @@ var writeSinkE int
 
 func BenchmarkPut8uint32Varint(b *testing.B) {
 	count := 8
+	out := make([]byte, count*binary.MaxVarintLen32)
 	nums := util.GenUint32(count)
-	out := make([]byte, binary.MaxVarintLen32*count)
 	written := 0
 
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		written = util.PutVarint(nums, out)
@@ -193,18 +193,17 @@ func BenchmarkPut8uint32Varint(b *testing.B) {
 
 var writeSinkF int
 
-func BenchmarkPut8uint32DiffVarint(b *testing.B) {
+func BenchmarkPut8uint32DeltaVarint(b *testing.B) {
 	count := 8
+	out := make([]byte, count*binary.MaxVarintLen32)
 	nums := util.GenUint32(count)
 	util.SortUint32(nums)
-
-	out := make([]byte, binary.MaxVarintLen32*count)
 	written := 0
 
-	b.SetBytes(32)
+	b.SetBytes(int64(count*MaxBytesPerNum))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		written = util.PutDiffVarint(nums, out, 0)
+		written = util.PutDeltaVarint(nums, out, 0)
 	}
 	writeSinkF = written
 }

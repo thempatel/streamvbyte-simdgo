@@ -10,10 +10,10 @@ func GetMode() shared.PerformanceMode {
 	return shared.Normal
 }
 
-func get8uint32(in []byte, out []uint32, ctrl uint16) int {
+func Get8uint32Fast(in []byte, out []uint32, ctrl uint16) int {
 	panic("unreachable")
 }
 
-func get8uint32Diff(in []byte, out []uint32, ctrl uint16, prev uint32) int {
+func Get8uint32DeltaFast(in []byte, out []uint32, ctrl uint16, prev uint32) int {
 	panic("unreachable")
 }

@@ -19,26 +19,26 @@ func GetMode() shared.PerformanceMode {
 	return shared.Normal
 }
 
-// put8uint32 binds to put8uint32Fast which is implemented
+// Put8uint32Fast binds to put8uint32Fast which is implemented
 // in assembly.
-func put8uint32(in []uint32, out []byte) uint16 {
-	return put8uint32Fast(in, out,
+func Put8uint32Fast(in []uint32, out []byte) uint16 {
+	return Put8uint32FastAsm(in, out,
 		shared.EncodeShuffleTable,
 		shared.PerControlLenTable,
 	)
 }
 
-// put8uint32Diff binds to put8uint32DiffFast which is implemented
+// Put8uint32DeltaFast binds to put8uint32DeltaFast which is implemented
 // in assembly.
-func put8uint32Diff(in []uint32, out []byte, prev uint32) uint16 {
-	return put8uint32DiffFast(
+func Put8uint32DeltaFast(in []uint32, out []byte, prev uint32) uint16 {
+	return Put8uint32DeltaFastAsm(
 		in, out, prev,
 		shared.EncodeShuffleTable,
 		shared.PerControlLenTable,
 	)
 }
 
-// put8uint32Fast has three core phases. First a 16-bit control is
+// Put8uint32FastAsm has three core phases. First a 16-bit control is
 // generated for the incoming 8 uint32s. Then, the calculated control
 // is used to index into shared.EncodeShuffleTable to fetch the
 // correct shuffle mask to compress the incoming integers. Finally,
@@ -192,12 +192,12 @@ func put8uint32Diff(in []uint32, out []byte, prev uint32) uint16 {
 // -----------------------------------------------------------------------
 // 00000000 00000000 00000000 00001100 00001010 10000011 00000100 11010010 // packed
 //go:noescape
-func put8uint32Fast(
+func Put8uint32FastAsm(
 	in []uint32, outBytes []byte,
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
 ) (r uint16)
 
-// put8uint32DiffFast works similarly to put8uint32Fast except
+// Put8uint32DeltaFastAsm works similarly to put8uint32Fast except
 // that prior to encoding the 8 uint32s, we first use differential
 // coding to change the original numbers into deltas using SIMD
 // techniques. Afterwards, the encoding algorithm follows the same
@@ -209,7 +209,7 @@ func put8uint32Fast(
 // Concat-shift:    [P A B C]
 // Subtract:        [A-P B-A C-B D-C]
 //go:noescape
-func put8uint32DiffFast(
+func Put8uint32DeltaFastAsm(
 	in []uint32, outBytes []byte, prev uint32,
 	shuffle *[256][16]uint8, lenTable *[256]uint8,
 ) (r uint16)
