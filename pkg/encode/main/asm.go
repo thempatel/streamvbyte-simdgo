@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	name      = "put8uint32Fast"
-	nameDelta  = "put8uint32DeltaFast"
+	name      = "Put8uint32FastAsm"
+	nameDelta  = "Put8uint32DeltaFastAsm"
 	pIn       = "in"
 	pOut      = "outBytes"
 	pShuffle  = "shuffle"

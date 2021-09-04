@@ -52,7 +52,8 @@ func TestFastReadAll(t *testing.T) {
 		nums := util.GenUint32(count)
 		stream := encodeNums(nums)
 		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
-			readNums := FastReadAll(count, stream)
+			out := AllocSlice(count)
+			readNums := FastReadAll(count, stream, out)
 			if !reflect.DeepEqual(nums, readNums) {
 				t.Fatalf("decoded wrong nums")
 			}
@@ -67,16 +68,33 @@ func BenchmarkFastReadAll(b *testing.B) {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
 		stream := encodeNums(nums)
-
+		out := AllocSlice(count)
 		b.Run(fmt.Sprintf("Count: %d", count), func(b *testing.B) {
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
 			b.ReportAllocs()
 			var read []uint32
 			for i := 0; i < b.N; i++ {
-				read = FastReadAll(count, stream)
+				read = FastReadAll(count, stream, out)
 			}
 			readSinkA = read
 		})
 	}
+}
+
+var readSinkB []uint32
+
+func BenchmarkFastRead(b *testing.B) {
+	count := 4096
+	nums := util.GenUint32(count)
+	stream := encodeNums(nums)
+	per := count*encode.MaxBytesPerNum
+	out := AllocSlice(count)
+	b.SetBytes(int64(per))
+	b.ResetTimer()
+	var read []uint32
+	for i := 0; i < b.N; i++ {
+		read = FastReadAll(count, stream, out)
+	}
+	readSinkB = read
 }

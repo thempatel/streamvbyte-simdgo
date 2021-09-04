@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	name     = "get8uint32Fast"
-	nameDelta = "get8uint32DeltaFast"
+	name     = "Get8uint32FastAsm"
+	nameDelta = "Get8uint32DeltaFastAsm"
 
 	pIn       = "in"
 	pOut      = "out"
