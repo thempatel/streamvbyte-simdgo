@@ -40,19 +40,35 @@ func FastReadAll(count int, stream []byte, out []uint32) []uint32 {
 		data := stream[dataPos:]
 
 		ctrl := uint16(stream[ctrlPos]) | uint16(stream[ctrlPos+1]) << 8
-		get8uint32Fast(data, out[decoded:], ctrl)
+		decode.Get8uint32FastAsm(
+			data, out[decoded:], ctrl,
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
 		sizeA := shared.ControlByteToSize(stream[ctrlPos]) + shared.ControlByteToSize(stream[ctrlPos+1])
 
 		ctrl = uint16(stream[ctrlPos+2]) | uint16(stream[ctrlPos+3]) << 8
-		get8uint32Fast(data[sizeA:], out[decoded+8:], ctrl)
+		decode.Get8uint32FastAsm(
+			data[sizeA:], out[decoded+8:], ctrl,
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
 		sizeB := shared.ControlByteToSize(stream[ctrlPos+2]) + shared.ControlByteToSize(stream[ctrlPos+3])
 
 		ctrl = uint16(stream[ctrlPos+4]) | uint16(stream[ctrlPos+5]) << 8
-		get8uint32Fast(data[sizeA+sizeB:], out[decoded+16:], ctrl)
+		decode.Get8uint32FastAsm(
+			data[sizeA+sizeB:], out[decoded+16:], ctrl,
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
 		sizeC := shared.ControlByteToSize(stream[ctrlPos+4]) + shared.ControlByteToSize(stream[ctrlPos+5])
 
 		ctrl = uint16(stream[ctrlPos+6]) | uint16(stream[ctrlPos+7]) << 8
-		get8uint32Fast(data[sizeA+sizeB+sizeC:], out[decoded+24:], ctrl)
+		decode.Get8uint32FastAsm(
+			data[sizeA+sizeB+sizeC:], out[decoded+24:], ctrl,
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
 		sizeD := shared.ControlByteToSize(stream[ctrlPos+6]) + shared.ControlByteToSize(stream[ctrlPos+7])
 
 		dataPos += sizeA + sizeB + sizeC + sizeD
@@ -61,7 +77,11 @@ func FastReadAll(count int, stream []byte, out []uint32) []uint32 {
 
 	for ; ctrlPos < ctrlLen-3; ctrlPos += 2 {
 		ctrl := uint16(stream[ctrlPos]) | uint16(stream[ctrlPos+1]) << 8
-		get8uint32Fast(stream[dataPos:], out[decoded:], ctrl)
+		decode.Get8uint32FastAsm(
+			stream[dataPos:], out[decoded:], ctrl,
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
 		dataPos += shared.ControlByteToSize(stream[ctrlPos]) + shared.ControlByteToSize(stream[ctrlPos+1])
 		decoded += 8
 	}
@@ -79,16 +99,4 @@ func FastReadAll(count int, stream []byte, out []uint32) []uint32 {
 	}
 
 	return out[:count]
-}
-
-// get8uint32Fast here is a convenience wrapper around the assembly impl
-// defined at decode.Get8uint32FastAsm. This is done to ensure that the
-// assembly func is inlined at the appropriate locations. Using
-// decode.Get8uint32Fast here adds another non-inlined func despite the
-// simplicity of the wrapper in that package.
-func get8uint32Fast(in []byte, out []uint32, ctrl uint16) {
-	decode.Get8uint32FastAsm(in, out, ctrl,
-		shared.DecodeShuffleTable,
-		shared.PerControlLenTable,
-	)
 }
