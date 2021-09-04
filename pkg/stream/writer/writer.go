@@ -1,4 +1,4 @@
-package stream
+package writer
 
 import (
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"

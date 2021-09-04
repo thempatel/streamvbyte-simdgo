@@ -1,4 +1,4 @@
-package stream
+package reader
 
 import (
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/decode"

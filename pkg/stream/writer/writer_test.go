@@ -1,4 +1,4 @@
-package stream
+package writer
 
 import (
 	"fmt"
@@ -16,14 +16,14 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-func TestReadAllScalar(t *testing.T) {
+func TestWriteAllScalar(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		count := int(util.RandUint32()%1e6)
 		nums := util.GenUint32(count)
 		stream := WriteAllScalar(nums)
-		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
+		t.Run(fmt.Sprintf("WriteAll: %d", count), func(t *testing.T) {
 			out := make([]uint32, count)
-			ReadAllScalar(count, stream, out)
+			WriteAllScalar(count, stream, out)
 			if !reflect.DeepEqual(nums, out) {
 				t.Fatalf("decoded wrong nums")
 			}
@@ -31,14 +31,14 @@ func TestReadAllScalar(t *testing.T) {
 	}
 }
 
-func TestReadAllFast(t *testing.T) {
+func TestWriteAllFast(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		count := int(util.RandUint32()%1e6)
 		nums := util.GenUint32(count)
 		stream := WriteAllScalar(nums)
-		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
+		t.Run(fmt.Sprintf("WriteAll: %d", count), func(t *testing.T) {
 			out := make([]uint32, count)
-			ReadAllFast(count, stream, out)
+			WriteAllFast(count, stream, out)
 			if !reflect.DeepEqual(nums, out) {
 				t.Fatalf("decoded wrong nums")
 			}
@@ -48,7 +48,7 @@ func TestReadAllFast(t *testing.T) {
 
 var readSinkA []uint32
 
-func BenchmarkReadAllFast(b *testing.B) {
+func BenchmarkWriteAllFast(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
@@ -58,7 +58,7 @@ func BenchmarkReadAllFast(b *testing.B) {
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				ReadAllFast(count, stream, out)
+				WriteAllFast(count, stream, out)
 			}
 			readSinkA = out
 		})
@@ -76,14 +76,14 @@ func BenchmarkFastRead(b *testing.B) {
 	b.SetBytes(int64(per))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ReadAllFast(count, stream, out)
+		WriteAllFast(count, stream, out)
 	}
 	readSinkB = out
 }
 
 var readSinkC []uint32
 
-func BenchmarkReadAllScalar(b *testing.B) {
+func BenchmarkWriteAllScalar(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
@@ -93,7 +93,7 @@ func BenchmarkReadAllScalar(b *testing.B) {
 			b.SetBytes(int64(count*encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				ReadAllScalar(count, stream, out)
+				WriteAllScalar(count, stream, out)
 			}
 			readSinkC = out
 		})
