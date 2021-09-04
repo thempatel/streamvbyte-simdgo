@@ -16,6 +16,21 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+func TestReadAllScalar(t *testing.T) {
+	for i := 0; i < 6; i++ {
+		count := int(util.RandUint32()%1e6)
+		nums := util.GenUint32(count)
+		stream := WriteAllScalar(nums)
+		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
+			out := make([]uint32, count)
+			ReadAllScalar(count, stream, out)
+			if !reflect.DeepEqual(nums, out) {
+				t.Fatalf("decoded wrong nums")
+			}
+		})
+	}
+}
+
 func TestReadAllFast(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		count := int(util.RandUint32()%1e6)
