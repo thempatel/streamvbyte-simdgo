@@ -11,7 +11,7 @@ const (
 )
 
 var (
-	putImpl Put8Impl
+	putImpl      Put8Impl
 	putDeltaImpl Put8DeltaImpl
 )
 
@@ -61,14 +61,14 @@ func PutUint32Scalar(in []uint32, out []byte, count int) uint8 {
 	}
 
 	var (
-		ctrl uint8
+		ctrl  uint8
 		shift = 0
 		total = 0
 	)
 	for i := 0; i < count; i++ {
 		size := encodeOne(in[i], out[total:])
 		total += size
-		ctrl |= uint8(size-1)<<shift
+		ctrl |= uint8(size-1) << shift
 		shift += 2
 	}
 

@@ -19,7 +19,7 @@ func init() {
 
 func TestWriteAllScalar(t *testing.T) {
 	for i := 0; i < 6; i++ {
-		count := int(util.RandUint32()%1e6)
+		count := int(util.RandUint32() % 1e6)
 		nums := util.GenUint32(count)
 		stream := WriteAllScalar(nums)
 		t.Run(fmt.Sprintf("WriteAll: %d", count), func(t *testing.T) {
@@ -34,7 +34,7 @@ func TestWriteAllScalar(t *testing.T) {
 
 func TestWriteAllFast(t *testing.T) {
 	for i := 0; i < 6; i++ {
-		count := int(util.RandUint32()%1e6)
+		count := int(util.RandUint32() % 1e6)
 		nums := util.GenUint32(count)
 		stream := WriteAllScalar(nums)
 		t.Run(fmt.Sprintf("WriteAll: %d", count), func(t *testing.T) {
@@ -54,7 +54,7 @@ func BenchmarkWriteAllFast(b *testing.B) {
 		nums := util.GenUint32(count)
 		b.Run(fmt.Sprintf("Count_1e%d", i), func(b *testing.B) {
 			var stream []byte
-			b.SetBytes(int64(count*encode.MaxBytesPerNum))
+			b.SetBytes(int64(count * encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				stream = WriteAllFast(nums)
@@ -69,7 +69,7 @@ var readSinkB []byte
 func BenchmarkFastWrite(b *testing.B) {
 	count := 4096
 	nums := util.GenUint32(count)
-	per := count*encode.MaxBytesPerNum
+	per := count * encode.MaxBytesPerNum
 	var stream []byte
 
 	b.SetBytes(int64(per))
@@ -88,7 +88,7 @@ func BenchmarkWriteAllScalar(b *testing.B) {
 		nums := util.GenUint32(count)
 		b.Run(fmt.Sprintf("Count_1e%d", i), func(b *testing.B) {
 			var stream []byte
-			b.SetBytes(int64(count*encode.MaxBytesPerNum))
+			b.SetBytes(int64(count * encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				stream = WriteAllScalar(nums)

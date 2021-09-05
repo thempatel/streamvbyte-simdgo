@@ -9,19 +9,19 @@ import (
 
 func WriteAllFast(in []uint32) []byte {
 	var (
-		count = len(in)
-		ctrlLen = (count+3)/4
-		stream = make([]byte, ctrlLen+(encode.MaxBytesPerNum*count))
+		count   = len(in)
+		ctrlLen = (count + 3) / 4
+		stream  = make([]byte, ctrlLen+(encode.MaxBytesPerNum*count))
 
-		dataPos = ctrlLen
-		ctrlPos = 0
-		encoded = 0
-		lowest32 = ((ctrlLen-3)*4) &^ 31
+		dataPos  = ctrlLen
+		ctrlPos  = 0
+		encoded  = 0
+		lowest32 = ((ctrlLen - 3) * 4) &^ 31
 	)
 
 	for ; encoded < lowest32; encoded += 32 {
-		ctrls := stream[ctrlPos:ctrlPos+8]
-		nums := in[encoded:encoded+32]
+		ctrls := stream[ctrlPos : ctrlPos+8]
+		nums := in[encoded : encoded+32]
 		out := stream[dataPos:]
 
 		ctrl := encode.Put8uint32FastAsm(
@@ -31,8 +31,8 @@ func WriteAllFast(in []uint32) []byte {
 			shared.PerControlLenTable,
 		)
 
-		ctrls[0] = uint8(ctrl&0xff)
-		ctrls[1] = uint8(ctrl>>8)
+		ctrls[0] = uint8(ctrl & 0xff)
+		ctrls[1] = uint8(ctrl >> 8)
 		sizeA := shared.ControlByteToSizeTwo(ctrl)
 
 		ctrl = encode.Put8uint32FastAsm(
@@ -42,8 +42,8 @@ func WriteAllFast(in []uint32) []byte {
 			shared.PerControlLenTable,
 		)
 
-		ctrls[2] = uint8(ctrl&0xff)
-		ctrls[3] = uint8(ctrl>>8)
+		ctrls[2] = uint8(ctrl & 0xff)
+		ctrls[3] = uint8(ctrl >> 8)
 		sizeB := shared.ControlByteToSizeTwo(ctrl)
 
 		ctrl = encode.Put8uint32FastAsm(
@@ -53,8 +53,8 @@ func WriteAllFast(in []uint32) []byte {
 			shared.PerControlLenTable,
 		)
 
-		ctrls[4] = uint8(ctrl&0xff)
-		ctrls[5] = uint8(ctrl>>8)
+		ctrls[4] = uint8(ctrl & 0xff)
+		ctrls[5] = uint8(ctrl >> 8)
 		sizeC := shared.ControlByteToSizeTwo(ctrl)
 
 		ctrl = encode.Put8uint32FastAsm(
@@ -64,8 +64,8 @@ func WriteAllFast(in []uint32) []byte {
 			shared.PerControlLenTable,
 		)
 
-		ctrls[6] = uint8(ctrl&0xff)
-		ctrls[7] = uint8(ctrl>>8)
+		ctrls[6] = uint8(ctrl & 0xff)
+		ctrls[7] = uint8(ctrl >> 8)
 		sizeD := shared.ControlByteToSizeTwo(ctrl)
 
 		ctrlPos += 8
@@ -80,14 +80,14 @@ func WriteAllFast(in []uint32) []byte {
 			shared.PerControlLenTable,
 		)
 
-		stream[ctrlPos] = uint8(ctrl&0xff)
-		stream[ctrlPos+1] = uint8(ctrl>>8)
+		stream[ctrlPos] = uint8(ctrl & 0xff)
+		stream[ctrlPos+1] = uint8(ctrl >> 8)
 		encoded += 8
 		dataPos += shared.ControlByteToSizeTwo(ctrl)
 	}
 
 	for ; ctrlPos < ctrlLen; ctrlPos += 1 {
-		nums := count-encoded
+		nums := count - encoded
 		if nums > 4 {
 			nums = 4
 		}

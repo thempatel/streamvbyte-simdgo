@@ -19,7 +19,7 @@ func init() {
 
 func TestReadAllScalar(t *testing.T) {
 	for i := 0; i < 6; i++ {
-		count := int(util.RandUint32()%1e6)
+		count := int(util.RandUint32() % 1e6)
 		nums := util.GenUint32(count)
 		stream := writer.WriteAllScalar(nums)
 		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
@@ -34,7 +34,7 @@ func TestReadAllScalar(t *testing.T) {
 
 func TestReadAllFast(t *testing.T) {
 	for i := 0; i < 6; i++ {
-		count := int(util.RandUint32()%1e6)
+		count := int(util.RandUint32() % 1e6)
 		nums := util.GenUint32(count)
 		stream := writer.WriteAllScalar(nums)
 		t.Run(fmt.Sprintf("ReadAll: %d", count), func(t *testing.T) {
@@ -56,7 +56,7 @@ func BenchmarkReadAllFast(b *testing.B) {
 		stream := writer.WriteAllScalar(nums)
 		out := make([]uint32, count)
 		b.Run(fmt.Sprintf("Count_1e%d", i), func(b *testing.B) {
-			b.SetBytes(int64(count*encode.MaxBytesPerNum))
+			b.SetBytes(int64(count * encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				ReadAllFast(count, stream, out)
@@ -72,7 +72,7 @@ func BenchmarkFastRead(b *testing.B) {
 	count := 4096
 	nums := util.GenUint32(count)
 	stream := writer.WriteAllScalar(nums)
-	per := count*encode.MaxBytesPerNum
+	per := count * encode.MaxBytesPerNum
 	out := make([]uint32, count)
 	b.SetBytes(int64(per))
 	b.ResetTimer()
@@ -91,7 +91,7 @@ func BenchmarkReadAllScalar(b *testing.B) {
 		stream := writer.WriteAllScalar(nums)
 		out := make([]uint32, count)
 		b.Run(fmt.Sprintf("Count_1e%d", i), func(b *testing.B) {
-			b.SetBytes(int64(count*encode.MaxBytesPerNum))
+			b.SetBytes(int64(count * encode.MaxBytesPerNum))
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
 				ReadAllScalar(count, stream, out)
@@ -99,4 +99,36 @@ func BenchmarkReadAllScalar(b *testing.B) {
 			readSinkC = out
 		})
 	}
+}
+
+var readSinkD []uint32
+
+func BenchmarkReadAllScalar1e4(b *testing.B) {
+	count := int(math.Pow10(4))
+	nums := util.GenUint32(count)
+	stream := writer.WriteAllScalar(nums)
+	out := make([]uint32, count)
+
+	// 68982
+	b.SetBytes(int64(count * encode.MaxBytesPerNum))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ReadAllScalar(count, stream, out)
+	}
+	readSinkD = out
+}
+
+func BenchmarkReadAllScalar1e3(b *testing.B) {
+	count := int(math.Pow10(3))
+	nums := util.GenUint32(count)
+	stream := writer.WriteAllScalar(nums)
+	out := make([]uint32, count)
+
+	// 2555
+	b.SetBytes(int64(count * encode.MaxBytesPerNum))
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ReadAllScalar(count, stream, out)
+	}
+	readSinkC = out
 }

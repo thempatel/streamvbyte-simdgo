@@ -7,7 +7,7 @@ import (
 
 func ReadAllScalar(count int, stream []byte, out []uint32) {
 	var (
-		ctrlLen = (count+3)/4
+		ctrlLen = (count + 3) / 4
 
 		dataPos = ctrlLen
 		ctrlPos = 0
