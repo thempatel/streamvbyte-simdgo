@@ -109,6 +109,56 @@ func TestPut8uint32DeltaFast(t *testing.T) {
 	}
 }
 
+func TestPutUint32Scalar(t *testing.T) {
+	count := rand.Intn(4) + 1
+	nums := util.GenUint32(count)
+	for i := 4 - count; i > 0; i-- {
+		nums = append(nums, 0)
+	}
+
+	expected := make([]byte, 4*MaxBytesPerNum)
+	ctrl := Put4uint32Scalar(nums, expected)
+	size := shared.ControlByteToSize(ctrl)
+	size -= 4 - count
+	expected = expected[:size]
+
+	out := make([]byte, count*MaxBytesPerNum)
+	ctrl = PutUint32Scalar(nums[:count], out, count)
+	size = shared.ControlByteToSize(ctrl)
+	size -= 4 - count
+	out = out[:size]
+	if !reflect.DeepEqual(expected, out) {
+		t.Fatalf("expected %+v, got %+v", expected, out)
+	}
+}
+
+func TestPutUint32DeltaScalar(t *testing.T) {
+	count := rand.Intn(4) + 1
+	nums := util.GenUint32(count)
+	util.SortUint32(nums)
+	for i := 4 - count; i > 0; i-- {
+		nums = append(nums, nums[count-1])
+	}
+
+	deltas := make([]uint32, 4)
+	util.Delta(nums, deltas)
+
+	expected := make([]byte, 4*MaxBytesPerNum)
+	ctrl := Put4uint32Scalar(deltas, expected)
+	size := shared.ControlByteToSize(ctrl)
+	size -= 4 - count
+	expected = expected[:size]
+
+	out := make([]byte, count*MaxBytesPerNum)
+	ctrl = PutUint32DeltaScalar(nums[:count], out, count, 0)
+	size = shared.ControlByteToSize(ctrl)
+	size -= 4 - count
+	out = out[:size]
+	if !reflect.DeepEqual(expected, out) {
+		t.Fatalf("expected %+v, got %+v", expected, out)
+	}
+}
+
 var writeSinkA uint16
 
 func BenchmarkPut8uint32Fast(b *testing.B) {

@@ -78,6 +78,35 @@ func TestGet8uint32DeltaFast(t *testing.T) {
 	}
 }
 
+func TestGetUint32Scalar(t *testing.T) {
+	count := rand.Intn(4) + 1
+	expected := util.GenUint32(count)
+	in := make([]byte, count*encode.MaxBytesPerNum)
+	ctrl := encode.PutUint32Scalar(expected, in, count)
+	out := make([]uint32, count)
+
+	GetUint32Scalar(in, out, ctrl, count)
+	if !reflect.DeepEqual(expected, out) {
+		t.Fatalf("expected %+v, got %+v", expected, out)
+	}
+}
+
+func TestGetUint32DeltaScalar(t *testing.T) {
+	count := rand.Intn(4) + 1
+	expected := util.GenUint32(count)
+	util.SortUint32(expected)
+	in := make([]byte, count*encode.MaxBytesPerNum)
+	deltas := make([]uint32, count)
+	util.Delta(expected, deltas)
+	ctrl := encode.PutUint32Scalar(deltas, in, count)
+
+	out := make([]uint32, count)
+	GetUint32DeltaScalar(in, out, ctrl, count, 0)
+	if !reflect.DeepEqual(expected, out) {
+		t.Fatalf("expected %+v, got %+v", expected, out)
+	}
+}
+
 var readSinkA []uint32
 
 func BenchmarkGet8uint32Fast(b *testing.B) {
