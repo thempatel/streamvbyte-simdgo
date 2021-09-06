@@ -25,6 +25,22 @@ func ReadAll(count int, stream []byte, out []uint32) {
 	}
 }
 
+// ReadAllDelta will read the entire input stream into out according to the
+// Stream VByte format. It will select the best implementation depending
+// on the presence of special hardware instructions. It will reconstruct the
+// original non differentially encoded values.
+//
+// Note: It is your responsibility to ensure that the incoming slices are
+// appropriately sized as well as tracking the count of integers in the
+// stream.
+func ReadAllDelta(count int, stream []byte, out []uint32, prev uint32) {
+	if decode.GetMode() == shared.Fast {
+		ReadAllDeltaFast(count, stream, out, prev)
+	} else {
+		ReadAllDeltaScalar(count, stream, out, prev)
+	}
+}
+
 // ReadAllScalar will read the entire input stream into out according to the
 // Stream VByte format.
 //
