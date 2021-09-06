@@ -27,18 +27,19 @@ func ReadAllFast(count int, stream []byte, out []uint32) {
 		// support it, which can lead to loading from uninitialized memory.
 		//
 		// [ _ _ _ _ | _ _ _ _ | _ _ _ _ | _ _ _ _ ]
+		//                    works fine --^ ^-- bad things here
 		//
-		// Imagine the last group in the above array is all encoded with 4 bytes.
-		// Decoding the first 4 integers in that group will work fine, since it
-		// will load the last 3 (unused) bytes. However, when attempting to
-		// decode the last three groups of 4, each load will need an extra
+		// Imagine the last group of 16 in the above array is all encoded with
+		// 4 bytes. Decoding the first 4 integers in that group will work fine,
+		// since it will load the last 3 (unused) bytes. However, when attempting
+		// to decode the last three groups of 4, each load will need an extra
 		// 1, 2, or 3 bytes (respectively) in order to be considered safe.
 		lowest32 = ((ctrlLen - 3) * 4) &^ 31
 	)
 
 	for ; decoded < lowest32; decoded += 32 {
 		data := stream[dataPos:]
-		ctrls := stream[ctrlPos : ctrlPos+8] // bounds check hint
+		ctrls := stream[ctrlPos : ctrlPos+8]
 		nums := out[decoded : decoded+32]
 
 		ctrl := uint16(ctrls[0]) | uint16(ctrls[1])<<8
