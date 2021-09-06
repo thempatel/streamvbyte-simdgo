@@ -5,25 +5,77 @@ import (
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
+const (
+	jump     = 16
+	jumpCtrl = jump / 4
+)
+
+// ReadAll will read the entire input stream into out according to the
+// Stream VByte format. It will select the best implementation depending
+// on the presence of special hardware instructions.
+//
+// Note: It is your responsibility to ensure that the incoming slices are
+// appropriately sized as well as tracking the count of integers in the
+// stream.
+func ReadAll(count int, stream []byte, out []uint32) {
+	if decode.GetMode() == shared.Fast {
+		ReadAllFast(count, stream, out)
+	} else {
+		ReadAllScalar(count, stream, out)
+	}
+}
+
+// ReadAllScalar will read the entire input stream into out according to the
+// Stream VByte format.
+//
+// Note: It is your responsibility to ensure that the incoming slices are
+// appropriately sized as well as tracking the count of integers in the
+// stream.
 func ReadAllScalar(count int, stream []byte, out []uint32) {
 	var (
 		ctrlLen = (count + 3) / 4
 
-		dataPos = ctrlLen
-		ctrlPos = 0
-		numsPos = 0
-		lowest4 = count &^ 3
+		dataPos    = ctrlLen
+		ctrlPos    = 0
+		decoded    = 0
+		lowestJump = count &^ (jump - 1)
+		lowest4    = count &^ 3
 	)
 
-	for ; numsPos < lowest4; numsPos += 4 {
+	for ; decoded < lowestJump; decoded += jump {
+		data := stream[dataPos:]
+		ctrls := stream[ctrlPos : ctrlPos+jumpCtrl]
+		nums := out[decoded : decoded+jump]
+
+		ctrl := ctrls[0]
+		decode.Get4uint32Scalar(data, nums, ctrl)
+		sizeA := shared.ControlByteToSize(ctrl)
+
+		ctrl = ctrls[1]
+		decode.Get4uint32Scalar(data[sizeA:], nums[4:], ctrl)
+		sizeB := shared.ControlByteToSize(ctrl)
+
+		ctrl = ctrls[2]
+		decode.Get4uint32Scalar(data[sizeA+sizeB:], nums[8:], ctrl)
+		sizeC := shared.ControlByteToSize(ctrl)
+
+		ctrl = ctrls[3]
+		decode.Get4uint32Scalar(data[sizeA+sizeB+sizeC:], nums[12:], ctrl)
+		sizeD := shared.ControlByteToSize(ctrl)
+
+		dataPos += sizeA + sizeB + sizeC + sizeD
+		ctrlPos += jumpCtrl
+	}
+
+	for ; decoded < lowest4; decoded += 4 {
 		ctrl := stream[ctrlPos]
-		decode.Get4uint32Scalar(stream[dataPos:], out[numsPos:], ctrl)
+		decode.Get4uint32Scalar(stream[dataPos:], out[decoded:], ctrl)
 		size := shared.ControlByteToSize(ctrl)
 		dataPos += size
 		ctrlPos++
 	}
 
 	if lowest4 != count {
-		decode.GetUint32Scalar(stream[dataPos:], out[numsPos:], stream[ctrlPos], count-lowest4)
+		decode.GetUint32Scalar(stream[dataPos:], out[decoded:], stream[ctrlPos], count-lowest4)
 	}
 }

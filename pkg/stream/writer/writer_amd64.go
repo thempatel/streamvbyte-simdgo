@@ -7,6 +7,9 @@ import (
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
+// WriteAllFast will encode all the integers from in using the Stream VByte
+// format using special hardware instructions and will return the byte array
+// holding the encoded data.
 func WriteAllFast(in []uint32) []byte {
 	var (
 		count   = len(in)

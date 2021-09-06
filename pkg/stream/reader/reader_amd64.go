@@ -7,6 +7,12 @@ import (
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 )
 
+// ReadAllFast will read the entire input stream into out according to the
+// Stream VByte format using special hardware instructions.
+//
+// Note: It is your responsibility to ensure that the incoming slices are
+// appropriately sized as well as tracking the count of integers in the
+// stream.
 func ReadAllFast(count int, stream []byte, out []uint32) {
 	var (
 		ctrlPos = 0

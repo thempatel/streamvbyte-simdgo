@@ -66,26 +66,11 @@ func BenchmarkWriteAllFast(b *testing.B) {
 
 var readSinkB []byte
 
-func BenchmarkFastWrite(b *testing.B) {
-	count := 4096
-	nums := util.GenUint32(count)
-	per := count * encode.MaxBytesPerNum
-	var stream []byte
-
-	b.SetBytes(int64(per))
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		stream = WriteAllFast(nums)
-	}
-	readSinkB = stream
-}
-
-var readSinkC []byte
-
 func BenchmarkWriteAllScalar(b *testing.B) {
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
+		util.SortUint32(nums)
 		b.Run(fmt.Sprintf("Count_1e%d", i), func(b *testing.B) {
 			var stream []byte
 			b.SetBytes(int64(count * encode.MaxBytesPerNum))
@@ -93,7 +78,7 @@ func BenchmarkWriteAllScalar(b *testing.B) {
 			for i := 0; i < b.N; i++ {
 				stream = WriteAllScalar(nums)
 			}
-			readSinkC = stream
+			readSinkB = stream
 		})
 	}
 }
