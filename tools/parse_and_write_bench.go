@@ -65,6 +65,9 @@ func main() {
 			if emitNewline {
 				lines = append(lines, "")
 			}
+			if hasBench {
+				line = strings.TrimPrefix(line, benchmark)
+			}
 			lines = append(lines, line)
 			if emitDash {
 				lines = append(lines, dashes)
