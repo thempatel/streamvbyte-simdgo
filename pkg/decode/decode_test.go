@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
 
@@ -43,6 +44,10 @@ func TestGet8uint32DeltaScalar(t *testing.T) {
 }
 
 func TestGet8uint32Fast(t *testing.T) {
+	if GetMode() == shared.Normal {
+		t.Skipf("Testing environment doesn't support this test")
+	}
+
 	count := 8
 	expected := util.GenUint32(count)
 	in := make([]byte, count*encode.MaxBytesPerNum)
@@ -56,6 +61,10 @@ func TestGet8uint32Fast(t *testing.T) {
 }
 
 func TestGet8uint32DeltaFast(t *testing.T) {
+	if GetMode() == shared.Normal {
+		t.Skipf("Testing environment doesn't support this test")
+	}
+
 	count := 8
 	expected := util.GenUint32(count)
 	util.SortUint32(expected)
@@ -72,6 +81,10 @@ func TestGet8uint32DeltaFast(t *testing.T) {
 var readSinkA []uint32
 
 func BenchmarkGet8uint32Fast(b *testing.B) {
+	if GetMode() == shared.Normal {
+		b.Skipf("Testing environment doesn't support this test")
+	}
+
 	count := 8
 	out := make([]uint32, count)
 
@@ -90,6 +103,10 @@ func BenchmarkGet8uint32Fast(b *testing.B) {
 var readSinkB []uint32
 
 func BenchmarkGet8uint32DeltaFast(b *testing.B) {
+	if GetMode() == shared.Normal {
+		b.Skipf("Testing environment doesn't support this test")
+	}
+
 	count := 8
 	out := make([]uint32, count)
 	nums := util.GenUint32(count)

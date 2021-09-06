@@ -75,6 +75,36 @@ func PutUint32Scalar(in []uint32, out []byte, count int) uint8 {
 	return ctrl
 }
 
+// PutUint32DeltaScalar encodes up to 4 integers from in into out using the
+// Stream VByte format.
+//
+// Note: It is your responsibility to ensure that the incoming slices have
+// the appropriate sizes and data otherwise this func will panic.
+func PutUint32DeltaScalar(in []uint32, out []byte, count int, prev uint32) uint8 {
+	if count == 0 {
+		return 0
+	}
+
+	if count > 4 {
+		count = 4
+	}
+
+	var (
+		ctrl  uint8
+		shift = 0
+		total = 0
+	)
+	for i := 0; i < count; i++ {
+		size := encodeOne(in[i]-prev, out[total:])
+		total += size
+		ctrl |= uint8(size-1) << shift
+		shift += 2
+		prev = in[i]
+	}
+
+	return ctrl
+}
+
 // Put8uint32Scalar will encode 8 uint32 values from in into out using the
 // Stream VByte format. Returns an 16-bit control value produced from the
 // encoding.

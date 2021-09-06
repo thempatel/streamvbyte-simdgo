@@ -112,6 +112,10 @@ func TestPut8uint32DeltaFast(t *testing.T) {
 var writeSinkA uint16
 
 func BenchmarkPut8uint32Fast(b *testing.B) {
+	if GetMode() == shared.Normal {
+		b.Skipf("Testing environment doesn't support this test")
+	}
+
 	count := 8
 	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)
@@ -128,6 +132,10 @@ func BenchmarkPut8uint32Fast(b *testing.B) {
 var writeSinkB uint16
 
 func BenchmarkPut8uint32DeltaFast(b *testing.B) {
+	if GetMode() == shared.Normal {
+		b.Skipf("Testing environment doesn't support this test")
+	}
+
 	count := 8
 	out := make([]byte, count*MaxBytesPerNum)
 	nums := util.GenUint32(count)

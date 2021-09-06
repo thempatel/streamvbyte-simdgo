@@ -115,3 +115,122 @@ func ReadAllFast(count int, stream []byte, out []uint32) {
 		decoded += nums
 	}
 }
+
+// ReadAllDeltaFast will read the entire input stream into out according to the
+// Stream VByte format using special hardware instructions. It will reconstruct
+// the original non differentially encoded values.
+//
+// Note: It is your responsibility to ensure that the incoming slices are
+// appropriately sized as well as tracking the count of integers in the
+// stream.
+func ReadAllDeltaFast(count int, stream []byte, out []uint32, prev uint32) {
+	var (
+		ctrlPos = 0
+		decoded = 0
+		dataPos = (count + 3) / 4
+		ctrlLen = dataPos
+		// lowest32 is the limit for the count of integers we'll read in
+		// bulk 8 at a time directly from the input stream. We subtract 3
+		// here since we load 16 bytes at a time in the assembly code. If
+		// you attempt to load the last few control bytes worth of data,
+		// it's possible there won't be enough bytes in the data stream to
+		// support it, which can lead to loading from uninitialized memory.
+		//
+		// [ _ _ _ _ | _ _ _ _ | _ _ _ _ | _ _ _ _ ]
+		//                    works fine --^ ^-- bad things here
+		//
+		// Imagine the last group of 16 in the above array is all encoded with
+		// 4 bytes. Decoding the first 4 integers in that group will work fine,
+		// since it will load the last 3 (unused) bytes. However, when attempting
+		// to decode the last three groups of 4, each load will need an extra
+		// 1, 2, or 3 bytes (respectively) in order to be considered safe.
+		lowest32 = ((ctrlLen - 3) * 4) &^ 31
+	)
+
+	for ; decoded < lowest32; decoded += 32 {
+		data := stream[dataPos:]
+		ctrls := stream[ctrlPos : ctrlPos+8]
+		nums := out[decoded : decoded+32]
+
+		ctrl := uint16(ctrls[0]) | uint16(ctrls[1])<<8
+		decode.Get8uint32DeltaFastAsm(
+			data,
+			nums,
+			ctrl,
+			prev,
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
+		sizeA := shared.ControlByteToSize(ctrls[0]) + shared.ControlByteToSize(ctrls[1])
+
+		ctrl = uint16(ctrls[2]) | uint16(ctrls[3])<<8
+		decode.Get8uint32DeltaFastAsm(
+			data[sizeA:],
+			nums[8:],
+			ctrl,
+			nums[7],
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
+		sizeB := shared.ControlByteToSize(ctrls[2]) + shared.ControlByteToSize(ctrls[3])
+
+		ctrl = uint16(ctrls[4]) | uint16(ctrls[5])<<8
+		decode.Get8uint32DeltaFastAsm(
+			data[sizeA+sizeB:],
+			nums[16:],
+			ctrl,
+			nums[15],
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
+		sizeC := shared.ControlByteToSize(ctrls[4]) + shared.ControlByteToSize(ctrls[5])
+
+		ctrl = uint16(ctrls[6]) | uint16(ctrls[7])<<8
+		decode.Get8uint32DeltaFastAsm(
+			data[sizeA+sizeB+sizeC:],
+			nums[24:],
+			ctrl,
+			nums[23],
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
+		sizeD := shared.ControlByteToSize(ctrls[6]) + shared.ControlByteToSize(ctrls[7])
+
+		dataPos += sizeA + sizeB + sizeC + sizeD
+		ctrlPos += 8
+		prev = nums[31]
+	}
+
+	// Must be strictly less than the last 4 blocks of integers, since we can't safely
+	// decode 8 if our ctrl pos starts at the first 4 in the block.
+	for ; ctrlPos < ctrlLen-4; ctrlPos += 2 {
+		ctrl := uint16(stream[ctrlPos]) | uint16(stream[ctrlPos+1])<<8
+		decode.Get8uint32DeltaFastAsm(
+			stream[dataPos:],
+			out[decoded:],
+			ctrl,
+			prev,
+			shared.DecodeShuffleTable,
+			shared.PerControlLenTable,
+		)
+		dataPos += shared.ControlByteToSize(stream[ctrlPos]) + shared.ControlByteToSize(stream[ctrlPos+1])
+		decoded += 8
+		prev = out[decoded-1]
+	}
+
+	for ; ctrlPos < ctrlLen; ctrlPos += 1 {
+		nums := count - decoded
+		if nums > 4 {
+			nums = 4
+		}
+		dataPos += decode.GetUint32DeltaScalar(
+			stream[dataPos:],
+			out[decoded:],
+			stream[ctrlPos],
+			nums,
+			prev,
+		)
+		decoded += nums
+		prev = out[decoded-1]
+	}
+}
