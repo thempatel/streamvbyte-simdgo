@@ -9,7 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/decode"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/stream/writer"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
@@ -50,6 +52,10 @@ func TestReadAllDeltaScalar(t *testing.T) {
 }
 
 func TestReadAllFast(t *testing.T) {
+	if decode.GetMode() == shared.Normal {
+		t.Skipf("Testing environment doesn't support this test")
+	}
+
 	for i := 0; i < 6; i++ {
 		count := int(util.RandUint32() % 1e6)
 		nums := util.GenUint32(count)
@@ -65,6 +71,10 @@ func TestReadAllFast(t *testing.T) {
 }
 
 func TestReadAllDeltaFast(t *testing.T) {
+	if decode.GetMode() == shared.Normal {
+		t.Skipf("Testing environment doesn't support this test")
+	}
+
 	for i := 0; i < 6; i++ {
 		count := int(util.RandUint32() % 1e6)
 		nums := util.GenUint32(count)
@@ -86,6 +96,10 @@ func TestReadAllDeltaFast(t *testing.T) {
 var readSinkA []uint32
 
 func BenchmarkReadAllFast(b *testing.B) {
+	if decode.GetMode() == shared.Normal {
+		b.Skipf("Testing environment doesn't support this test")
+	}
+
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
@@ -105,6 +119,10 @@ func BenchmarkReadAllFast(b *testing.B) {
 var readSinkB []uint32
 
 func BenchmarkReadAllDeltaFast(b *testing.B) {
+	if decode.GetMode() == shared.Normal {
+		b.Skipf("Testing environment doesn't support this test")
+	}
+
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)

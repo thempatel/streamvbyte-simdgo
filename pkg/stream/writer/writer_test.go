@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/encode"
+	"github.com/theMPatel/streamvbyte-simdgo/pkg/shared"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/stream/reader"
 	"github.com/theMPatel/streamvbyte-simdgo/pkg/util"
 )
@@ -52,6 +53,10 @@ func TestWriteAllDeltaScalar(t *testing.T) {
 }
 
 func TestWriteAllFast(t *testing.T) {
+	if encode.GetMode() == shared.Normal {
+		t.Skipf("Testing environment doesn't support this test")
+	}
+
 	for i := 0; i < 6; i++ {
 		count := int(util.RandUint32() % 1e6)
 		nums := util.GenUint32(count)
@@ -66,6 +71,10 @@ func TestWriteAllFast(t *testing.T) {
 }
 
 func TestWriteAllDeltaFast(t *testing.T) {
+	if encode.GetMode() == shared.Normal {
+		t.Skipf("Testing environment doesn't support this test")
+	}
+
 	for i := 0; i < 6; i++ {
 		count := int(util.RandUint32() % 1e6)
 		nums := util.GenUint32(count)
@@ -86,6 +95,10 @@ func TestWriteAllDeltaFast(t *testing.T) {
 var readSinkA []byte
 
 func BenchmarkWriteAllFast(b *testing.B) {
+	if encode.GetMode() == shared.Normal {
+		b.Skipf("Testing environment doesn't support this test")
+	}
+
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
@@ -104,6 +117,10 @@ func BenchmarkWriteAllFast(b *testing.B) {
 var readSinkB []byte
 
 func BenchmarkWriteAllDeltaFast(b *testing.B) {
+	if encode.GetMode() == shared.Normal {
+		b.Skipf("Testing environment doesn't support this test")
+	}
+
 	for i := 0; i < 8; i++ {
 		count := int(math.Pow10(i))
 		nums := util.GenUint32(count)
